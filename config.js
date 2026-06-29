@@ -97,7 +97,7 @@ window.APP_CONFIG = {
       id: "link-design-portfolio",
       label: "Design & UI/UX Portfolio",
       subtitle: "View my design case studies, wireframes, and creative works",
-      url: "https://shazee.dev/",
+      url: "https://drive.google.com/drive/folders/1cCZOZkVMOMjzhdT6GgkMP1cYsKO7hRpJ?usp=sharing",
       icon: {
         type: "material",
         name: "palette"
@@ -124,24 +124,24 @@ window.APP_CONFIG = {
       },
       sublinks: [
         {
-          label: "Fullstack Dev/ SE",
-          driveUrl: "https://drive.google.com/file/d/1lbqsYckkoKvcfl5o43_holVFELyj_1l7/view?usp=sharing",
-          downloadUrl: "assets/CV_MGSS_Developer.pdf"
+          label: "SE Intern/Fullstack Developer",
+          driveUrl: "https://drive.google.com/file/d/1iVeRbBiHrUhZoq48N_VyVXtP-Vi8jc00/view?usp=sharing",
+          downloadUrl: "assets/CV-MGSSR-SE.pdf"
         },
         {
-          label: "UIUX",
-          driveUrl: "https://drive.google.com/file/d/1TdtsUtk5bHPthOvjRUmuVVLdVg4ziloK/view?usp=sharing",
-          downloadUrl: "assets/CV_MGSS_UIUX.pdf"
+          label: "UI/UX Designer",
+          driveUrl: "https://drive.google.com/file/d/1rOdQF3rOipULLO5pib2-cyM5a8kiP4Yt/view?usp=sharing",
+          downloadUrl: "assets/CV-MGSSR-UIUX.pdf"
         },
         {
           label: "Graphic Designer",
-          driveUrl: "https://drive.google.com/file/d/1hdK4hu0UOsDqP7IYXYxy14mkUXaER16V/view?usp=sharing",
-          downloadUrl: "assets/CV_MGSS_Graphic_Design.pdf"
+          driveUrl: "https://drive.google.com/file/d/1cPY7QXiSXQp7iKhUm9zK3KzGZWmWxJCw/view?usp=sharing",
+          downloadUrl: "assets/CV-MGSSR-GRAPHIC-DESIGNER.pdf"
         },
         {
           label: "View All",
           driveUrl: "https://drive.google.com/drive/folders/1O98AGYLFV4pZWbq4ocQB2wP7VlGTMbJC?usp=sharing",
-          downloadUrl: "assets/CV_MGSS_All.pdf"
+          downloadUrl: "assets/CV-All.pdf"
         }
       ]
     },
