@@ -1,9 +1,22 @@
-# Beacon - Link in Bio (Free Linktree Alternative)
+# Beacon - Link in Bio
 
-A premium, configuration-driven personal link directory with rich micro-interactions and an ambient animated mesh background. Designed to serve as a fast, customizable, and modern hub for all your professional and social links.
+**A premium, zero-database Linktree alternative. Configured in seconds, hosted for free.**
+
+Beacon is a lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and an ambient animated mesh background. Designed to serve as a modern hub for all your professional and social links without the bloat of a backend database.
 
 > [!TIP]
-> This project is entirely static and configuration-driven. You don't need any complex build systems or backend servers to get started—just edit a single config file and you are ready to deploy.
+> **Zero build steps required.** Just edit a single `config.js` file and deploy directly to GitHub Pages, Vercel, or Netlify in one click.
+
+<div align="center">
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=github.com/shazee-04/beacon)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=github.com/shazee-04/beacon)
+
+<img src="https://github.com/user-attachments/assets/c43d8be7-7387-46c1-ba95-c75d8452acab" alt="Beacon Link in Bio Preview" width="100%" />
+
+[Live Demo](https://bio.shazee.dev) · [Report Bug](https://github.com/shazee-04/beacon/issues) · [Request Feature](https://github.com/shazee-04/beacon/issues)
+
+</div>
 
 ---
 
@@ -129,3 +142,9 @@ You can customize the theme colors, typography, and motion details at the top of
 
 > [!NOTE]
 > Icons are rendered using Google's **Material Symbols Outlined** collection. You can change any icon by finding its name on [Google Fonts Icons](https://fonts.google.com/icons) and putting it in the config file.
+
+## Contributing
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/beacon/issues). If you want to add a new theme or feature, fork the repository and submit a pull request.
+
+## License
+This project is open-source and available under the [MIT License](LICENSE).
