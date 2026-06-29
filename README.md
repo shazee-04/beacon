@@ -144,7 +144,7 @@ You can customize the theme colors, typography, and motion details at the top of
 > Icons are rendered using Google's **Material Symbols Outlined** collection. You can change any icon by finding its name on [Google Fonts Icons](https://fonts.google.com/icons) and putting it in the config file.
 
 ## Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/your-username/beacon/issues). If you want to add a new theme or feature, fork the repository and submit a pull request.
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/shazee-04/beacon/issues). If you want to add a new theme or feature, fork the repository and submit a pull request.
 
 ## License
 This project is open-source and available under the [MIT License](LICENSE).
