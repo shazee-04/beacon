@@ -4,14 +4,18 @@ let currentConfig = window.APP_CONFIG ? JSON.parse(JSON.stringify(window.APP_CON
 };
 
 // --- Tab Navigation Setup ---
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  
+  const btn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
+  if (btn) btn.classList.add('active');
+  const pane = document.getElementById(tabId);
+  if (pane) pane.classList.add('active');
+}
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    
-    btn.classList.add('active');
-    document.getElementById(btn.dataset.tab).classList.add('active');
-  });
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
 });
 
 // --- Simple Data Binding ---
@@ -167,12 +171,17 @@ function renderLinks() {
         <div class="sublinks-container">
           <h6>Sublinks</h6>
           ${link.sublinks.map((sub, sidx) => `
-            <div class="sublink-item">
-              <input type="text" placeholder="Label" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)">
-              <input type="text" placeholder="Drive URL" value="${sub.driveUrl || ''}" onchange="updateSublink(${index}, ${sidx}, 'driveUrl', this.value)">
-              <input type="text" placeholder="Download URL" value="${sub.downloadUrl || ''}" onchange="updateSublink(${index}, ${sidx}, 'downloadUrl', this.value)">
+            <div class="sublink-item" style="flex-wrap: wrap;">
+              <input type="text" placeholder="Label" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)" style="flex:1; min-width: 120px;">
+              <input type="text" placeholder="Drive URL" value="${sub.driveUrl || ''}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'driveUrl', this.value)" style="flex:1; min-width: 120px;">
+              <input type="text" placeholder="Download URL" value="${sub.downloadUrl || ''}" id="dl-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'downloadUrl', this.value)" style="flex:1; min-width: 120px;">
+              
+              <input type="file" id="sublink-file-${index}-${sidx}" style="display:none" onchange="handleSublinkFileUpload(event, ${index}, ${sidx})">
+              <button class="btn-icon" onclick="document.getElementById('sublink-file-${index}-${sidx}').click()" title="Upload File to GitHub"><span class="material-symbols-outlined">upload_file</span></button>
+              
               <button class="btn-icon delete" onclick="deleteSublink(${index}, ${sidx})" title="Delete Sublink"><span class="material-symbols-outlined">delete</span></button>
             </div>
+            <small id="sublink-status-${index}-${sidx}" style="display:block; margin-bottom:12px; color:var(--primary); font-weight:500;"></small>
           `).join('')}
           <button class="btn btn-secondary btn-sm mt-2" onclick="addSublink(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Sublink</button>
         </div>
@@ -307,10 +316,22 @@ ghUsernameInput.value = localStorage.getItem('bioLinkGhUsername') || '';
 ghRepoInput.value = localStorage.getItem('bioLinkGhRepo') || '';
 ghTokenInput.value = localStorage.getItem('bioLinkGhToken') || '';
 
-// Save credentials on input
-ghUsernameInput.addEventListener('input', e => localStorage.setItem('bioLinkGhUsername', e.target.value));
-ghRepoInput.addEventListener('input', e => localStorage.setItem('bioLinkGhRepo', e.target.value));
-ghTokenInput.addEventListener('input', e => localStorage.setItem('bioLinkGhToken', e.target.value));
+// Save credentials on input and show indicator
+function saveCredential(key, value) {
+  localStorage.setItem(key, value);
+  const indicator = document.getElementById(`saved-${key}`);
+  if (indicator) {
+    indicator.style.opacity = '1';
+    clearTimeout(indicator.timeout);
+    indicator.timeout = setTimeout(() => {
+      indicator.style.opacity = '0';
+    }, 2000);
+  }
+}
+
+ghUsernameInput.addEventListener('input', e => saveCredential('bioLinkGhUsername', e.target.value));
+ghRepoInput.addEventListener('input', e => saveCredential('bioLinkGhRepo', e.target.value));
+ghTokenInput.addEventListener('input', e => saveCredential('bioLinkGhToken', e.target.value));
 
 document.getElementById('btn-deploy').addEventListener('click', async () => {
   const username = ghUsernameInput.value.trim();
@@ -385,6 +406,114 @@ window.APP_CONFIG = ${JSON.stringify(currentConfig, null, 2)};
     statusEl.textContent = `Error: ${error.message}`;
     statusEl.style.color = '#d32f2f';
   }
+});
+
+
+// --- Reusable GitHub File Upload Function ---
+async function uploadFileToGitHub(file, path) {
+  const username = ghUsernameInput.value.trim();
+  const repo = ghRepoInput.value.trim();
+  const token = ghTokenInput.value.trim();
+
+  if (!username || !repo || !token) {
+    throw new Error('Please set your GitHub credentials in the Settings tab first.');
+  }
+
+  // Convert file to Base64
+  const arrayBuffer = await file.arrayBuffer();
+  const base64Content = btoa(
+    new Uint8Array(arrayBuffer).reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+
+  const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
+  
+  // Try to get existing file SHA (in case of overwrite)
+  let sha = null;
+  const getRes = await fetch(fileUrl, {
+    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (getRes.ok) {
+    const data = await getRes.json();
+    sha = data.sha;
+  }
+
+  // Upload file
+  const putRes = await fetch(fileUrl, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Accept': 'application/vnd.github.v3+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      message: `Upload ${file.name} via Bio Link Editor`,
+      content: base64Content,
+      sha: sha
+    })
+  });
+
+  if (!putRes.ok) {
+    const err = await putRes.json();
+    throw new Error(err.message || 'Upload failed');
+  }
+  
+  return path;
+}
+
+// Avatar File Upload
+document.getElementById('prof-avatar-file')?.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('avatar-upload-status');
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `profile-image/${file.name.replace(/\\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.profile.avatar = path;
+    document.getElementById('prof-avatar').value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+});
+
+// Sublink File Upload
+window.handleSublinkFileUpload = async (event, lIdx, sIdx) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`sublink-status-${lIdx}-${sIdx}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `assets/${file.name.replace(/\\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.links[lIdx].sublinks[sIdx].downloadUrl = path;
+    document.getElementById(`dl-${lIdx}-${sIdx}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
+
+
+// --- Modal Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('welcome-modal');
+  const hasToken = localStorage.getItem('bioLinkGhToken');
+
+  if (!hasToken) {
+    modal.style.display = 'flex';
+  }
+
+  document.getElementById('btn-dismiss-modal').addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  document.getElementById('btn-go-settings').addEventListener('click', () => {
+    modal.style.display = 'none';
+    switchTab('settings');
+  });
 });
 
 // Initial Render

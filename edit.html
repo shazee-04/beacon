@@ -15,6 +15,18 @@
   <script src="config.js"></script>
 </head>
 <body>
+  <!-- Welcome/Awareness Modal -->
+  <div id="welcome-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h2>Automate Your Setup</h2>
+      <p style="margin: 12px 0; color: var(--text-muted); line-height: 1.5;">Welcome to the Bio Link Editor! Did you know you can automate file uploads and config deployments directly to GitHub?</p>
+      <p style="margin-bottom: 24px; color: var(--text-muted); line-height: 1.5;">To enable this, head over to the <strong>Settings</strong> tab and add your GitHub Personal Access Token.</p>
+      <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-secondary" id="btn-dismiss-modal">Dismiss</button>
+        <button class="btn btn-primary" id="btn-go-settings">Go to Settings</button>
+      </div>
+    </div>
+  </div>
   <div class="admin-layout">
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
@@ -26,9 +38,10 @@
         <button class="nav-btn" data-tab="skills"><span class="material-symbols-outlined">palette</span> Skills</button>
         <button class="nav-btn" data-tab="socials"><span class="material-symbols-outlined">share</span> Socials</button>
         <button class="nav-btn" data-tab="links"><span class="material-symbols-outlined">link</span> Links</button>
-        <button class="nav-btn" data-tab="cta-footer"><span class="material-symbols-outlined">call_to_action</span> CTA & Footer</button>
+        <button class="nav-btn" data-tab="cta-footer"><span class="material-symbols-outlined">call_to_action</span> CTA</button>
+        <button class="nav-btn" data-tab="settings"><span class="material-symbols-outlined">settings</span> Settings</button>
         <div class="spacer"></div>
-        <button class="nav-btn export-btn" data-tab="export"><span class="material-symbols-outlined">code</span> Export</button>
+        <button class="nav-btn export-btn" data-tab="export"><span class="material-symbols-outlined">save</span> Save & Deploy</button>
       </nav>
     </aside>
 
@@ -55,7 +68,12 @@
         </div>
         <div class="form-group">
           <label>Avatar (URL or Monogram)</label>
-          <input type="text" id="prof-avatar">
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="prof-avatar" style="flex:1;">
+            <input type="file" id="prof-avatar-file" accept="image/*" style="display:none;">
+            <button class="btn btn-secondary" onclick="document.getElementById('prof-avatar-file').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+          </div>
+          <small id="avatar-upload-status" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
         </div>
       </div>
 
@@ -130,7 +148,19 @@
       <!-- Export Tab -->
       <div id="export" class="tab-pane">
         <header class="pane-header">
-          <h3>Export Configuration</h3>
+          <h3>Deploy Configuration</h3>
+          <p>Deploy directly to GitHub, or generate the code to copy manually.</p>
+        </header>
+        
+        <div class="export-actions mb-3 mt-4">
+          <button class="btn btn-primary" id="btn-deploy" style="background-color: #2da44e; color: #fff;">
+            <span class="material-symbols-outlined">cloud_upload</span> Deploy to GitHub
+          </button>
+        </div>
+        <div id="deploy-status" style="margin-top: 12px; margin-bottom: 32px; font-size: 0.9rem; font-weight: 500;"></div>
+
+        <header class="pane-header" style="border-top: 1px solid var(--border); padding-top: 32px;">
+          <h3>Manual Export</h3>
           <p>Copy this code and replace the contents of your <code>config.js</code> file.</p>
         </header>
         <div class="export-actions mb-3">
@@ -142,30 +172,36 @@
           </button>
         </div>
         <textarea id="export-code" class="code-area" readonly placeholder="Your generated config will appear here..."></textarea>
+      </div>
 
-        <header class="pane-header mt-5">
-          <h3>Optional: Deploy to GitHub</h3>
-          <p>If you are hosting this on GitHub Pages, you can save your changes directly to your repository without copy-pasting.</p>
+      <!-- Settings Tab -->
+      <div id="settings" class="tab-pane">
+        <header class="pane-header">
+          <h3>GitHub Integration</h3>
+          <p>Automate your deployments and file uploads directly to your GitHub repository.</p>
         </header>
         <div class="form-group">
           <label>GitHub Username</label>
-          <input type="text" id="gh-username" placeholder="e.g. shazee-04">
+          <div style="position:relative;">
+            <input type="text" id="gh-username" placeholder="e.g. shazee-04">
+            <span id="saved-bioLinkGhUsername" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
         </div>
         <div class="form-group">
           <label>Repository Name</label>
-          <input type="text" id="gh-repo" placeholder="e.g. bio-link">
+          <div style="position:relative;">
+            <input type="text" id="gh-repo" placeholder="e.g. bio-link">
+            <span id="saved-bioLinkGhRepo" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
         </div>
         <div class="form-group">
           <label>Personal Access Token <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" style="font-size: 0.8rem; text-decoration: underline; color: blue;">(create one)</a></label>
-          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; background: var(--surface); color: var(--text-main);">
+          <div style="position:relative;">
+            <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; background: var(--surface); color: var(--text-main);">
+            <span id="saved-bioLinkGhToken" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
           <small style="display:block; margin-top: 4px; color: var(--text-muted); font-size: 0.8rem;">Your token is saved securely in your browser's local storage and is never sent to any third-party server.</small>
         </div>
-        <div class="export-actions mb-3">
-          <button class="btn btn-primary" id="btn-deploy" style="background-color: #2da44e; color: #fff;">
-            <span class="material-symbols-outlined">cloud_upload</span> Deploy to GitHub
-          </button>
-        </div>
-        <div id="deploy-status" style="margin-top: 12px; font-size: 0.9rem; font-weight: 500;"></div>
       </div>
 
     </main>
