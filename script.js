@@ -58,6 +58,8 @@
         `;
       } else if (social.icon.type === 'material') {
         iconHtml = `<span class="material-symbols-outlined fs-5">${social.icon.name}</span>`;
+      } else if (social.icon.type === 'image') {
+        iconHtml = `<img src="${social.icon.url}" width="18" height="18" style="object-fit: contain;">`;
       }
       return `
         <a href="${social.url}" target="_blank" class="social-btn btn" aria-label="${social.label}" id="${social.id}">
@@ -91,6 +93,8 @@
         `;
       } else if (link.icon.type === 'material') {
         iconHtml = `<span class="material-symbols-outlined">${link.icon.name}</span>`;
+      } else if (link.icon.type === 'image') {
+        iconHtml = `<img src="${link.icon.url}" width="24" height="24" style="object-fit: contain;">`;
       }
 
       if (link.sublinks) {

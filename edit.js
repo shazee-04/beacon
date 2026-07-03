@@ -86,8 +86,29 @@ function renderSocials() {
   const container = document.getElementById('socials-list');
   container.innerHTML = '';
   currentConfig.socials.forEach((social, index) => {
-    const isSvg = social.icon && social.icon.type === 'svg';
-    const iconValue = isSvg ? social.icon.path : social.icon.name;
+    const type = social.icon ? social.icon.type : 'material';
+    let iconValue = '';
+    if (type === 'svg') iconValue = social.icon.path;
+    else if (type === 'image') iconValue = social.icon.url;
+    else iconValue = social.icon.name;
+    
+    let iconInputHtml = '';
+    if (type === 'image') {
+      iconInputHtml = `
+        <label>Image URL</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" value="${iconValue || ''}" onchange="updateSocialIconValue(${index}, this.value)" id="social-icon-url-${index}" style="flex:1">
+          <input type="file" id="social-icon-file-${index}" accept="image/*,.svg" style="display:none" onchange="handleSocialIconUpload(event, ${index})">
+          <button class="btn btn-secondary" onclick="document.getElementById('social-icon-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+        </div>
+        <small id="social-icon-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+      `;
+    } else {
+      iconInputHtml = `
+        <label>${type === 'svg' ? 'SVG Path' : 'Material Name'}</label>
+        <input type="text" value="${iconValue || ''}" onchange="updateSocialIconValue(${index}, this.value)">
+      `;
+    }
 
     const item = document.createElement('div');
     item.className = 'list-item';
@@ -116,13 +137,13 @@ function renderSocials() {
         <div class="form-group mb-0">
           <label>Icon Type</label>
           <select onchange="updateSocialIconType(${index}, this.value)">
-            <option value="material" ${!isSvg ? 'selected' : ''}>Material Symbol</option>
-            <option value="svg" ${isSvg ? 'selected' : ''}>SVG Path</option>
+            <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
+            <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
+            <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
           </select>
         </div>
         <div class="form-group mb-0">
-          <label>${isSvg ? 'SVG Path' : 'Material Name'}</label>
-          <input type="text" value="${iconValue || ''}" onchange="updateSocialIconValue(${index}, this.value)">
+          ${iconInputHtml}
         </div>
       </div>
     `;
@@ -135,6 +156,8 @@ window.updateSocial = (index, key, val) => { currentConfig.socials[index][key] =
 window.updateSocialIconType = (index, type) => {
   if (type === 'svg') {
     currentConfig.socials[index].icon = { type: 'svg', viewBox: '0 0 24 24', path: '' };
+  } else if (type === 'image') {
+    currentConfig.socials[index].icon = { type: 'image', url: '' };
   } else {
     currentConfig.socials[index].icon = { type: 'material', name: '' };
   }
@@ -143,6 +166,8 @@ window.updateSocialIconType = (index, type) => {
 window.updateSocialIconValue = (index, val) => {
   if (currentConfig.socials[index].icon.type === 'svg') {
     currentConfig.socials[index].icon.path = val;
+  } else if (currentConfig.socials[index].icon.type === 'image') {
+    currentConfig.socials[index].icon.url = val;
   } else {
     currentConfig.socials[index].icon.name = val;
   }
@@ -158,8 +183,29 @@ function renderLinks() {
   const container = document.getElementById('links-list');
   container.innerHTML = '';
   currentConfig.links.forEach((link, index) => {
-    const isSvg = link.icon && link.icon.type === 'svg';
-    const iconValue = isSvg ? link.icon.path : link.icon.name;
+    const type = link.icon ? link.icon.type : 'material';
+    let iconValue = '';
+    if (type === 'svg') iconValue = link.icon.path;
+    else if (type === 'image') iconValue = link.icon.url;
+    else iconValue = link.icon.name;
+
+    let iconInputHtml = '';
+    if (type === 'image') {
+      iconInputHtml = `
+        <label>Image URL</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" value="${iconValue || ''}" onchange="updateLinkIconValue(${index}, this.value)" id="link-icon-url-${index}" style="flex:1">
+          <input type="file" id="link-icon-file-${index}" accept="image/*,.svg" style="display:none" onchange="handleLinkIconUpload(event, ${index})">
+          <button class="btn btn-secondary" onclick="document.getElementById('link-icon-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+        </div>
+        <small id="link-icon-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+      `;
+    } else {
+      iconInputHtml = `
+        <label>${type === 'svg' ? 'SVG Path' : 'Material Name'}</label>
+        <input type="text" value="${iconValue || ''}" onchange="updateLinkIconValue(${index}, this.value)">
+      `;
+    }
 
     const item = document.createElement('div');
     item.className = 'list-item';
@@ -217,13 +263,13 @@ function renderLinks() {
         <div class="form-group mb-0">
           <label>Icon Type</label>
           <select onchange="updateLinkIconType(${index}, this.value)">
-            <option value="material" ${!isSvg ? 'selected' : ''}>Material Symbol</option>
-            <option value="svg" ${isSvg ? 'selected' : ''}>SVG Path</option>
+            <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
+            <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
+            <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
           </select>
         </div>
         <div class="form-group mb-0">
-          <label>${isSvg ? 'SVG Path' : 'Material Name'}</label>
-          <input type="text" value="${iconValue || ''}" onchange="updateLinkIconValue(${index}, this.value)">
+          ${iconInputHtml}
         </div>
       </div>
       ${sublinksHtml}
@@ -238,6 +284,8 @@ window.updateLink = (index, key, val) => { currentConfig.links[index][key] = val
 window.updateLinkIconType = (index, type) => {
   if (type === 'svg') {
     currentConfig.links[index].icon = { type: 'svg', viewBox: '0 0 24 24', path: '' };
+  } else if (type === 'image') {
+    currentConfig.links[index].icon = { type: 'image', url: '' };
   } else {
     currentConfig.links[index].icon = { type: 'material', name: '' };
   }
@@ -246,6 +294,8 @@ window.updateLinkIconType = (index, type) => {
 window.updateLinkIconValue = (index, val) => {
   if (currentConfig.links[index].icon.type === 'svg') {
     currentConfig.links[index].icon.path = val;
+  } else if (currentConfig.links[index].icon.type === 'image') {
+    currentConfig.links[index].icon.url = val;
   } else {
     currentConfig.links[index].icon.name = val;
   }
@@ -489,6 +539,42 @@ window.handleSublinkFileUpload = async (event, lIdx, sIdx) => {
     await uploadFileToGitHub(file, path);
     currentConfig.links[lIdx].sublinks[sIdx].downloadUrl = path;
     document.getElementById(`dl-${lIdx}-${sIdx}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
+
+// Social Icon File Upload
+window.handleSocialIconUpload = async (event, index) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`social-icon-status-${index}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `assets/icons/${file.name.replace(/\\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.socials[index].icon.url = path;
+    document.getElementById(`social-icon-url-${index}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
+
+// Link Icon File Upload
+window.handleLinkIconUpload = async (event, index) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`link-icon-status-${index}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `assets/icons/${file.name.replace(/\\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.links[index].icon.url = path;
+    document.getElementById(`link-icon-url-${index}`).value = path;
     statusEl.textContent = 'Upload successful!';
     setTimeout(() => statusEl.textContent = '', 3000);
   } catch (err) {
