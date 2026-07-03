@@ -297,6 +297,96 @@ document.getElementById('btn-copy').addEventListener('click', () => {
   });
 });
 
+// --- GitHub Deployment ---
+const ghUsernameInput = document.getElementById('gh-username');
+const ghRepoInput = document.getElementById('gh-repo');
+const ghTokenInput = document.getElementById('gh-token');
+
+// Load saved credentials
+ghUsernameInput.value = localStorage.getItem('bioLinkGhUsername') || '';
+ghRepoInput.value = localStorage.getItem('bioLinkGhRepo') || '';
+ghTokenInput.value = localStorage.getItem('bioLinkGhToken') || '';
+
+// Save credentials on input
+ghUsernameInput.addEventListener('input', e => localStorage.setItem('bioLinkGhUsername', e.target.value));
+ghRepoInput.addEventListener('input', e => localStorage.setItem('bioLinkGhRepo', e.target.value));
+ghTokenInput.addEventListener('input', e => localStorage.setItem('bioLinkGhToken', e.target.value));
+
+document.getElementById('btn-deploy').addEventListener('click', async () => {
+  const username = ghUsernameInput.value.trim();
+  const repo = ghRepoInput.value.trim();
+  const token = ghTokenInput.value.trim();
+  const statusEl = document.getElementById('deploy-status');
+
+  if (!username || !repo || !token) {
+    statusEl.textContent = 'Please fill in all GitHub credentials.';
+    statusEl.style.color = '#d32f2f';
+    return;
+  }
+
+  statusEl.textContent = 'Preparing configuration...';
+  statusEl.style.color = 'var(--text-main)';
+
+  const code = `/* ═══════════════════════════════════════════
+   BIO LINK — Central Configuration File
+   Modify this file to easily update your links,
+   profile details, socials, and skills.
+   ═══════════════════════════════════════════ */
+
+window.APP_CONFIG = ${JSON.stringify(currentConfig, null, 2)};
+`;
+
+  try {
+    statusEl.textContent = 'Fetching current file status...';
+    
+    // 1. Get the current file's SHA (required to update it)
+    const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
+    const getRes = await fetch(fileUrl, {
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    let sha = null;
+    if (getRes.ok) {
+      const data = await getRes.json();
+      sha = data.sha;
+    } else if (getRes.status !== 404) {
+      throw new Error('Failed to fetch current file. Check your credentials and repo name.');
+    }
+
+    statusEl.textContent = 'Pushing update to GitHub...';
+
+    // 2. Update the file
+    const putRes = await fetch(fileUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update config.js via Bio Link Editor',
+        content: btoa(unescape(encodeURIComponent(code))), // Base64 encode the content safely
+        sha: sha
+      })
+    });
+
+    if (putRes.ok) {
+      statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
+      statusEl.style.color = '#388e3c'; // Green
+    } else {
+      const errorData = await putRes.json();
+      throw new Error(errorData.message || 'Failed to update file.');
+    }
+  } catch (error) {
+    console.error(error);
+    statusEl.textContent = `Error: ${error.message}`;
+    statusEl.style.color = '#d32f2f';
+  }
+});
+
 // Initial Render
 renderSkills();
 renderSocials();

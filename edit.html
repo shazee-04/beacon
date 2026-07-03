@@ -142,6 +142,30 @@
           </button>
         </div>
         <textarea id="export-code" class="code-area" readonly placeholder="Your generated config will appear here..."></textarea>
+
+        <header class="pane-header mt-5">
+          <h3>Optional: Deploy to GitHub</h3>
+          <p>If you are hosting this on GitHub Pages, you can save your changes directly to your repository without copy-pasting.</p>
+        </header>
+        <div class="form-group">
+          <label>GitHub Username</label>
+          <input type="text" id="gh-username" placeholder="e.g. shazee-04">
+        </div>
+        <div class="form-group">
+          <label>Repository Name</label>
+          <input type="text" id="gh-repo" placeholder="e.g. bio-link">
+        </div>
+        <div class="form-group">
+          <label>Personal Access Token <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" style="font-size: 0.8rem; text-decoration: underline; color: blue;">(create one)</a></label>
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; background: var(--surface); color: var(--text-main);">
+          <small style="display:block; margin-top: 4px; color: var(--text-muted); font-size: 0.8rem;">Your token is saved securely in your browser's local storage and is never sent to any third-party server.</small>
+        </div>
+        <div class="export-actions mb-3">
+          <button class="btn btn-primary" id="btn-deploy" style="background-color: #2da44e; color: #fff;">
+            <span class="material-symbols-outlined">cloud_upload</span> Deploy to GitHub
+          </button>
+        </div>
+        <div id="deploy-status" style="margin-top: 12px; font-size: 0.9rem; font-weight: 500;"></div>
       </div>
 
     </main>
