@@ -3,6 +3,19 @@ let currentConfig = window.APP_CONFIG ? JSON.parse(JSON.stringify(window.APP_CON
   profile: {}, skills: [], cta: {}, socials: [], links: [], footer: {}
 };
 
+// Ensure new structure elements exist
+if (!currentConfig.theme) currentConfig.theme = { preset: 'deep-indigo' };
+if (!currentConfig.featured) currentConfig.featured = [];
+if (!currentConfig.ctas) currentConfig.ctas = [];
+if (currentConfig.cta && currentConfig.ctas.length === 0) {
+  currentConfig.ctas.push({
+    label: currentConfig.cta.label || '',
+    url: currentConfig.cta.url || '',
+    icon: currentConfig.cta.icon || '',
+    style: 'primary'
+  });
+}
+
 // --- Tab Navigation Setup ---
 function switchTab(tabId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -34,10 +47,8 @@ bindInput('prof-title', currentConfig.profile, 'title');
 bindInput('prof-bio', currentConfig.profile, 'bio');
 bindInput('prof-avatar', currentConfig.profile, 'avatar');
 
-// Bind CTA
-bindInput('cta-label', currentConfig.cta, 'label');
-bindInput('cta-url', currentConfig.cta, 'url');
-bindInput('cta-icon', currentConfig.cta, 'icon');
+// Bind Featured Title
+bindInput('featured-title-input', currentConfig, 'featuredTitle');
 
 // Bind Footer
 bindInput('footer-year', currentConfig.footer, 'year', true);
@@ -207,16 +218,19 @@ function renderLinks() {
       `;
     }
 
-    const item = document.createElement('div');
-    item.className = 'list-item';
-    
-    // Sublinks rendering
-    let sublinksHtml = '';
-    if (link.sublinks) {
-      sublinksHtml = `
+    // Determine current link type
+    let linkType = 'standard';
+    if (link.sublinks) linkType = 'sublinks';
+    else if (link.embedUrl) linkType = 'embed';
+    else if (link.isBanner) linkType = 'banner';
+
+    // Build specific options based on type
+    let typeConfigHtml = '';
+    if (linkType === 'sublinks') {
+      typeConfigHtml = `
         <div class="sublinks-container">
-          <h6>Sublinks</h6>
-          ${link.sublinks.map((sub, sidx) => `
+          <h6>Sublinks / Collapsible Files</h6>
+          ${(link.sublinks || []).map((sub, sidx) => `
             <div class="sublink-item" style="flex-wrap: wrap;">
               <input type="text" placeholder="Label" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)" style="flex:1; min-width: 120px;">
               <input type="text" placeholder="Drive URL" value="${sub.driveUrl || ''}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'driveUrl', this.value)" style="flex:1; min-width: 120px;">
@@ -232,8 +246,41 @@ function renderLinks() {
           <button class="btn btn-secondary btn-sm mt-2" onclick="addSublink(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Sublink</button>
         </div>
       `;
+    } else if (linkType === 'embed') {
+      typeConfigHtml = `
+        <div class="form-group mb-3">
+          <label>Embed Player URL (YouTube, Spotify, Vimeo, etc.)</label>
+          <input type="text" value="${link.embedUrl || ''}" placeholder="e.g. https://www.youtube.com/embed/dQw4w9WgXcQ" onchange="updateLink(${index}, 'embedUrl', this.value)">
+          <small style="color: var(--text-muted); font-size: 0.8rem; display:block; margin-top:4px;">Must be the embeddable version (e.g. contains '/embed/').</small>
+        </div>
+      `;
+    } else if (linkType === 'banner') {
+      typeConfigHtml = `
+        <div class="form-group mb-3">
+          <label>Action URL</label>
+          <input type="text" value="${link.url || ''}" onchange="updateLink(${index}, 'url', this.value)">
+        </div>
+        <div class="form-group mb-3">
+          <label>Banner Image (Upload or Link)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" value="${link.bannerImage || ''}" onchange="updateLink(${index}, 'bannerImage', this.value)" id="link-banner-url-${index}" style="flex:1">
+            <input type="file" id="link-banner-file-${index}" accept="image/*" style="display:none" onchange="handleLinkBannerUpload(event, ${index})">
+            <button class="btn btn-secondary" onclick="document.getElementById('link-banner-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+          </div>
+          <small id="link-banner-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+        </div>
+      `;
+    } else {
+      typeConfigHtml = `
+        <div class="form-group mb-3">
+          <label>Action URL</label>
+          <input type="text" value="${link.url || ''}" onchange="updateLink(${index}, 'url', this.value)">
+        </div>
+      `;
     }
 
+    const item = document.createElement('div');
+    item.className = 'list-item';
     item.innerHTML = `
       <div class="list-item-header">
         <div class="list-item-title">${link.label || 'New Link'}</div>
@@ -243,23 +290,30 @@ function renderLinks() {
       </div>
       <div class="grid-2">
         <div class="form-group mb-3">
+          <label>Link Type</label>
+          <select onchange="changeLinkType(${index}, this.value)">
+            <option value="standard" ${linkType === 'standard' ? 'selected' : ''}>Standard Link</option>
+            <option value="embed" ${linkType === 'embed' ? 'selected' : ''}>Expandable Embed Player</option>
+            <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
+            <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
+          </select>
+        </div>
+        <div class="form-group mb-3">
           <label>ID (Optional)</label>
           <input type="text" value="${link.id || ''}" onchange="updateLink(${index}, 'id', this.value)">
         </div>
+      </div>
+      <div class="grid-2">
         <div class="form-group mb-3">
           <label>Label</label>
           <input type="text" value="${link.label || ''}" onchange="updateLink(${index}, 'label', this.value)">
         </div>
+        <div class="form-group mb-3">
+          <label>Subtitle / Description</label>
+          <input type="text" value="${link.subtitle || ''}" onchange="updateLink(${index}, 'subtitle', this.value)">
+        </div>
       </div>
-      <div class="form-group mb-3">
-        <label>Subtitle</label>
-        <input type="text" value="${link.subtitle || ''}" onchange="updateLink(${index}, 'subtitle', this.value)">
-      </div>
-      <div class="form-group mb-3">
-        <label>URL (Optional if using sublinks)</label>
-        <input type="text" value="${link.url || ''}" onchange="updateLink(${index}, 'url', this.value)">
-      </div>
-      <div class="grid-2">
+      <div class="grid-2" style="margin-bottom: 20px;">
         <div class="form-group mb-0">
           <label>Icon Type</label>
           <select onchange="updateLinkIconType(${index}, this.value)">
@@ -272,8 +326,7 @@ function renderLinks() {
           ${iconInputHtml}
         </div>
       </div>
-      ${sublinksHtml}
-      ${!link.sublinks ? `<button class="btn btn-secondary btn-sm mt-3" onclick="initSublinks(${index})"><span class="material-symbols-outlined" style="font-size:16px;">account_tree</span> Enable Sublinks</button>` : ''}
+      ${typeConfigHtml}
     `;
     container.appendChild(item);
   });
@@ -301,10 +354,27 @@ window.updateLinkIconValue = (index, val) => {
   }
 };
 
-window.initSublinks = (index) => {
-  currentConfig.links[index].sublinks = [];
+window.changeLinkType = (index, type) => {
+  const link = currentConfig.links[index];
+  delete link.sublinks;
+  delete link.embedUrl;
+  delete link.isBanner;
+  delete link.bannerImage;
+  
+  if (type === 'sublinks') {
+    link.sublinks = [];
+  } else if (type === 'embed') {
+    link.embedUrl = 'https://www.youtube.com/embed/';
+  } else if (type === 'banner') {
+    link.isBanner = true;
+    link.bannerImage = '';
+    link.url = 'https://';
+  } else {
+    link.url = 'https://';
+  }
   renderLinks();
 };
+
 window.addSublink = (index) => {
   currentConfig.links[index].sublinks.push({ label: 'New Sublink', driveUrl: '', downloadUrl: '' });
   renderLinks();
@@ -583,21 +653,229 @@ window.handleLinkIconUpload = async (event, index) => {
 };
 
 
+// Link Banner File Upload
+window.handleLinkBannerUpload = async (event, index) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`link-banner-status-${index}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `assets/${file.name.replace(/\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.links[index].bannerImage = path;
+    document.getElementById(`link-banner-url-${index}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
+
+// Featured Image File Upload
+window.handleFeaturedImageUpload = async (event, index) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`featured-image-status-${index}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `assets/${file.name.replace(/\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.featured[index].image = path;
+    document.getElementById(`featured-image-url-${index}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
+
+// --- Render CTAs ---
+function renderCtas() {
+  const container = document.getElementById('ctas-list');
+  if (!container) return;
+  container.innerHTML = '';
+  currentConfig.ctas.forEach((cta, index) => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.innerHTML = `
+      <div class="list-item-header">
+        <div class="list-item-title">CTA Button ${index + 1}</div>
+        <div class="list-item-actions">
+          <button class="btn-icon delete" onclick="deleteCta(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-3">
+          <label>Label</label>
+          <input type="text" value="${cta.label || ''}" onchange="updateCta(${index}, 'label', this.value)">
+        </div>
+        <div class="form-group mb-3">
+          <label>URL</label>
+          <input type="text" value="${cta.url || ''}" onchange="updateCta(${index}, 'url', this.value)">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-0">
+          <label>Icon (Material Name)</label>
+          <input type="text" value="${cta.icon || ''}" onchange="updateCta(${index}, 'icon', this.value)">
+        </div>
+        <div class="form-group mb-0">
+          <label>Button Style</label>
+          <select onchange="updateCta(${index}, 'style', this.value)">
+            <option value="primary" ${cta.style !== 'secondary' ? 'selected' : ''}>Primary (Solid)</option>
+            <option value="secondary" ${cta.style === 'secondary' ? 'selected' : ''}>Secondary (Outlined)</option>
+          </select>
+        </div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+window.deleteCta = (index) => { currentConfig.ctas.splice(index, 1); renderCtas(); };
+window.updateCta = (index, key, val) => { currentConfig.ctas[index][key] = val; };
+document.getElementById('add-cta').addEventListener('click', () => {
+  currentConfig.ctas.push({ label: 'New CTA', url: 'https://', icon: 'link', style: 'primary' });
+  renderCtas();
+});
+
+// --- Render Featured Items ---
+function renderFeatured() {
+  const container = document.getElementById('featured-list');
+  if (!container) return;
+  container.innerHTML = '';
+  currentConfig.featured.forEach((item, index) => {
+    const el = document.createElement('div');
+    el.className = 'list-item';
+    el.innerHTML = `
+      <div class="list-item-header">
+        <div class="list-item-title">Featured Item ${index + 1}</div>
+        <div class="list-item-actions">
+          <button class="btn-icon delete" onclick="deleteFeatured(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-3">
+          <label>Title</label>
+          <input type="text" value="${item.title || ''}" onchange="updateFeatured(${index}, 'title', this.value)">
+        </div>
+        <div class="form-group mb-3">
+          <label>Subtitle / Category</label>
+          <input type="text" value="${item.subtitle || ''}" onchange="updateFeatured(${index}, 'subtitle', this.value)">
+        </div>
+      </div>
+      <div class="form-group mb-3">
+        <label>Description</label>
+        <textarea rows="2" onchange="updateFeatured(${index}, 'description', this.value)">${item.description || ''}</textarea>
+      </div>
+      <div class="form-group mb-3">
+        <label>Action URL</label>
+        <input type="text" value="${item.url || ''}" onchange="updateFeatured(${index}, 'url', this.value)">
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-3">
+          <label>Badge (e.g. Figma, New)</label>
+          <input type="text" value="${item.badge || ''}" onchange="updateFeatured(${index}, 'badge', this.value)">
+        </div>
+        <div class="form-group mb-3">
+          <label>Price / Value Tag</label>
+          <input type="text" value="${item.price || ''}" onchange="updateFeatured(${index}, 'price', this.value)">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group mb-0">
+          <label>Action Label</label>
+          <input type="text" value="${item.actionLabel || ''}" placeholder="e.g. View Project" onchange="updateFeatured(${index}, 'actionLabel', this.value)">
+        </div>
+        <div class="form-group mb-0">
+          <label>Image (Upload or Link)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" value="${item.image || ''}" onchange="updateFeatured(${index}, 'image', this.value)" id="featured-image-url-${index}" style="flex:1">
+            <input type="file" id="featured-image-file-${index}" accept="image/*" style="display:none" onchange="handleFeaturedImageUpload(event, index)">
+            <button class="btn btn-secondary" onclick="document.getElementById('featured-image-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+          </div>
+          <small id="featured-image-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+window.deleteFeatured = (index) => { currentConfig.featured.splice(index, 1); renderFeatured(); };
+window.updateFeatured = (index, key, val) => { currentConfig.featured[index][key] = val; };
+document.getElementById('add-featured').addEventListener('click', () => {
+  currentConfig.featured.push({ title: 'New Featured Item', subtitle: 'Category', description: '', url: 'https://', badge: '', price: '', actionLabel: 'View Project', image: '' });
+  renderFeatured();
+});
+
+// --- Render Theme Settings ---
+function renderTheme() {
+  const presetSelect = document.getElementById('theme-preset');
+  if (!presetSelect) return;
+  presetSelect.value = currentConfig.theme.preset || 'deep-indigo';
+  
+  const customDiv = document.getElementById('custom-theme-colors');
+  if (currentConfig.theme.preset === 'custom') {
+    customDiv.style.display = 'block';
+    if (!currentConfig.theme.customColors) {
+      currentConfig.theme.customColors = {
+        primary: "#4B47B7",
+        primaryHover: "#3A369C",
+        secondary: "#5D5C72",
+        tertiary: "#7A5369",
+        bg: "#FFFBFF",
+        cardBg: "#FFFFFF",
+        border: "#E5E1EC",
+        textMain: "#1C1B1F",
+        textMuted: "#787680"
+      };
+    }
+    
+    const colors = currentConfig.theme.customColors;
+    const keys = ['primary', 'primaryHover', 'secondary', 'tertiary', 'bg', 'cardBg', 'border', 'textMain', 'textMuted'];
+    keys.forEach(key => {
+      const val = colors[key] || '';
+      const inputEl = document.getElementById(`theme-${key}`);
+      const pickerEl = document.getElementById(`theme-${key}-picker`);
+      if (inputEl) inputEl.value = val;
+      if (pickerEl) pickerEl.value = val;
+    });
+  } else {
+    customDiv.style.display = 'none';
+  }
+}
+
+window.handleThemePresetChange = (preset) => {
+  currentConfig.theme.preset = preset;
+  renderTheme();
+};
+
+window.updateCustomColor = (key, val) => {
+  if (!currentConfig.theme.customColors) {
+    currentConfig.theme.customColors = {};
+  }
+  currentConfig.theme.customColors[key] = val;
+  
+  const textEl = document.getElementById(`theme-${key}`);
+  const pickerEl = document.getElementById(`theme-${key}-picker`);
+  if (textEl && textEl.value !== val) textEl.value = val;
+  if (pickerEl && pickerEl.value !== val) pickerEl.value = val;
+};
+
 // --- Modal Logic ---
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('welcome-modal');
   const hasToken = localStorage.getItem('bioLinkGhToken');
 
   if (!hasToken) {
-    modal.style.display = 'flex';
+    if (modal) modal.style.display = 'flex';
   }
 
-  document.getElementById('btn-dismiss-modal').addEventListener('click', () => {
-    modal.style.display = 'none';
+  document.getElementById('btn-dismiss-modal')?.addEventListener('click', () => {
+    if (modal) modal.style.display = 'none';
   });
 
-  document.getElementById('btn-go-settings').addEventListener('click', () => {
-    modal.style.display = 'none';
+  document.getElementById('btn-go-settings')?.addEventListener('click', () => {
+    if (modal) modal.style.display = 'none';
     switchTab('settings');
   });
 });
@@ -606,3 +884,6 @@ document.addEventListener('DOMContentLoaded', () => {
 renderSkills();
 renderSocials();
 renderLinks();
+renderCtas();
+renderFeatured();
+renderTheme();

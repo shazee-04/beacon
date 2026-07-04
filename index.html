@@ -37,51 +37,62 @@
 
   <main class="container py-5">
     <div class="layout-grid">
-      <!-- ═══ Employee ID Badge Card ═══ -->
-      <section class="badge-card card border-0 shadow-sm rounded-5" aria-label="Profile">
-        <!-- Badge surface -->
-        <div class="badge-surface p-4 text-center">
-          <!-- Photo / Avatar area -->
-          <div class="badge-photo-area mb-3 d-flex justify-content-center">
-            <div class="badge-photo d-flex align-items-center justify-content-center shadow-sm" id="profile-avatar-container">
+      <!-- Sidebar Column (Profile Card + Footer) -->
+      <div class="sidebar-column">
+        <!-- ═══ Employee ID Badge Card ═══ -->
+        <section class="badge-card card border-0 shadow-sm rounded-5" aria-label="Profile">
+          <!-- Badge surface -->
+          <div class="badge-surface p-4 text-center">
+            <!-- Photo / Avatar area -->
+            <div class="badge-photo-area mb-3 d-flex justify-content-center">
+              <div class="badge-photo d-flex align-items-center justify-content-center shadow-sm" id="profile-avatar-container">
+                <!-- Populate dynamically -->
+              </div>
+            </div>
+
+            <!-- Identity info -->
+            <div class="badge-identity mb-3" id="profile-identity-container">
+              <!-- Populate dynamically -->
+            </div>
+
+            <!-- Skill chips -->
+            <div class="badge-chips d-flex justify-content-center flex-wrap gap-2 mb-4" id="profile-skills-container">
+              <!-- Populate dynamically -->
+            </div>
+
+            <hr class="my-3 text-secondary-emphasis opacity-25">
+
+            <!-- Social icons row -->
+            <nav class="badge-socials d-flex justify-content-center gap-2 mb-4" aria-label="Social media profiles" id="profile-socials-container">
+              <!-- Populate dynamically -->
+            </nav>
+
+            <hr class="my-3 text-secondary-emphasis opacity-25">
+
+            <!-- CTA button -->
+            <div class="badge-cta" id="profile-cta-container">
               <!-- Populate dynamically -->
             </div>
           </div>
+        </section>
 
-          <!-- Identity info -->
-          <div class="badge-identity mb-3" id="profile-identity-container">
-            <!-- Populate dynamically -->
-          </div>
+        <footer class="footer text-center mt-auto py-4" id="footer-container">
+          <!-- Populate dynamically -->
+        </footer>
+      </div>
 
-          <!-- Skill chips -->
-          <div class="badge-chips d-flex justify-content-center flex-wrap gap-2 mb-4" id="profile-skills-container">
-            <!-- Populate dynamically -->
-          </div>
+      <!-- Content Column -->
+      <div class="content-column">
+        <!-- Featured items container -->
+        <section id="featured-container" class="mb-3" style="display: none;">
+          <!-- Populate dynamically -->
+        </section>
 
-          <hr class="my-3 text-secondary-emphasis opacity-25">
-
-          <!-- Social icons row -->
-          <nav class="badge-socials d-flex justify-content-center gap-2 mb-4" aria-label="Social media profiles" id="profile-socials-container">
-            <!-- Populate dynamically -->
-          </nav>
-
-          <hr class="my-3 text-secondary-emphasis opacity-25">
-
-          <!-- CTA button -->
-          <div class="badge-cta" id="profile-cta-container">
-            <!-- Populate dynamically -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Links list -->
-      <nav class="links-list" aria-label="All links" id="links-list-container">
-        <!-- Populate dynamically -->
-      </nav>
-
-      <footer class="footer text-center mt-auto py-4" id="footer-container">
-        <!-- Populate dynamically -->
-      </footer>
+        <!-- Links list -->
+        <nav class="links-list" aria-label="All links" id="links-list-container">
+          <!-- Populate dynamically -->
+        </nav>
+      </div>
     </div>
   </main>
 

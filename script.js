@@ -14,6 +14,95 @@
     return;
   }
 
+  // --- Theme Presets & Loading ---
+  const THEME_PRESETS = {
+    "deep-indigo": {
+      primary: "#4B47B7",
+      primaryHover: "#3A369C",
+      secondary: "#5D5C72",
+      tertiary: "#7A5369",
+      bg: "#FFFBFF",
+      cardBg: "#FFFFFF",
+      border: "#E5E1EC",
+      textMain: "#1C1B1F",
+      textMuted: "#787680"
+    },
+    "sunset-peach": {
+      primary: "#E05A47",
+      primaryHover: "#C44331",
+      secondary: "#8C6A5C",
+      tertiary: "#E89B7A",
+      bg: "#FFFDFB",
+      cardBg: "#FFFFFF",
+      border: "#F7EBE6",
+      textMain: "#2E2522",
+      textMuted: "#7A6862"
+    },
+    "emerald-sage": {
+      primary: "#2E7D32",
+      primaryHover: "#1B5E20",
+      secondary: "#607D8B",
+      tertiary: "#A5D6A7",
+      bg: "#F1F8E9",
+      cardBg: "#FFFFFF",
+      border: "#DCEDC8",
+      textMain: "#212121",
+      textMuted: "#546E7A"
+    },
+    "midnight-tech": {
+      primary: "#00F2FE",
+      primaryHover: "#4FACFE",
+      secondary: "#6A7B8C",
+      tertiary: "#4A00E0",
+      bg: "#0B0C10",
+      cardBg: "#1F2833",
+      border: "#2C3531",
+      textMain: "#C5C6C7",
+      textMuted: "#8D8D8D"
+    },
+    "monochrome-ink": {
+      primary: "#000000",
+      primaryHover: "#222222",
+      secondary: "#555555",
+      tertiary: "#CCCCCC",
+      bg: "#FFFFFF",
+      cardBg: "#FFFFFF",
+      border: "#111111",
+      textMain: "#000000",
+      textMuted: "#666666"
+    }
+  };
+
+  function applyTheme(themeConfig) {
+    if (!themeConfig) return;
+    let colors = null;
+    if (THEME_PRESETS[themeConfig.preset]) {
+      colors = THEME_PRESETS[themeConfig.preset];
+    } else if (themeConfig.preset === 'custom' && themeConfig.customColors) {
+      colors = themeConfig.customColors;
+    }
+    if (colors) {
+      const root = document.documentElement;
+      root.style.setProperty('--primary-color', colors.primary);
+      root.style.setProperty('--primary-hover', colors.primaryHover);
+      root.style.setProperty('--secondary-color', colors.secondary);
+      root.style.setProperty('--tertiary-color', colors.tertiary);
+      root.style.setProperty('--bg-color', colors.bg);
+      root.style.setProperty('--card-bg', colors.cardBg);
+      root.style.setProperty('--border-color', colors.border);
+      if (colors.textMain) root.style.setProperty('--text-main', colors.textMain);
+      if (colors.textMuted) root.style.setProperty('--text-muted', colors.textMuted);
+      
+      if (themeConfig.preset === 'midnight-tech') {
+        document.body.classList.add('dark-theme');
+      } else {
+        document.body.classList.remove('dark-theme');
+      }
+    }
+  }
+
+  applyTheme(config.theme);
+
   // Render Avatar
   const avatarContainer = document.getElementById('profile-avatar-container');
   if (avatarContainer && config.profile) {
@@ -69,16 +158,83 @@
     }).join('');
   }
 
-  // Render CTA Button
+  // Render CTA Buttons
   const ctaContainer = document.getElementById('profile-cta-container');
-  if (ctaContainer && config.cta) {
-    ctaContainer.innerHTML = `
-      <a href="${config.cta.url}" target="_blank" class="btn btn-cta w-100 rounded-pill py-2 px-3 d-inline-flex align-items-center justify-content-center gap-2">
-        ${config.cta.label}
-        <span class="material-symbols-outlined fs-5">${config.cta.icon}</span>
-      </a>
+  if (ctaContainer) {
+    let ctasList = [];
+    if (Array.isArray(config.ctas)) {
+      ctasList = config.ctas;
+    } else if (config.cta) {
+      ctasList = [config.cta];
+    }
+    
+    if (ctasList.length > 0) {
+      ctaContainer.innerHTML = `
+        <div class="badge-cta">
+          ${ctasList.map(cta => {
+            const styleClass = cta.style === 'secondary' ? 'secondary' : '';
+            return `
+              <a href="${cta.url}" target="_blank" class="btn btn-cta ${styleClass} w-100 rounded-pill py-2 px-3 d-inline-flex align-items-center justify-content-center gap-2">
+                ${cta.label}
+                <span class="material-symbols-outlined fs-5">${cta.icon}</span>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+  }
+
+  // Render Featured Items
+  const featuredContainer = document.getElementById('featured-container');
+  if (featuredContainer && Array.isArray(config.featured) && config.featured.length > 0) {
+    featuredContainer.style.display = 'block';
+    const title = config.featuredTitle || '';
+    const cardsHtml = config.featured.map(item => {
+      const badgeHtml = item.badge ? `<span class="featured-badge">${item.badge}</span>` : '';
+      const priceHtml = item.price ? `<span class="featured-price">${item.price}</span>` : '';
+      const badgeRow = (item.badge || item.price) ? `
+        <div class="featured-badge-row">
+          ${badgeHtml}
+          ${priceHtml}
+        </div>
+      ` : '';
+      const imageHtml = item.image ? `
+        <div class="featured-image-wrapper">
+          <img src="${item.image}" alt="${item.title}" class="featured-image" loading="lazy">
+        </div>
+      ` : '';
+      const subtitleHtml = item.subtitle ? `<span class="featured-subtitle">${item.subtitle}</span>` : '';
+      const actionLabel = item.actionLabel || 'View Project';
+      
+      return `
+        <div class="col-sm-6">
+          <a href="${item.url}" target="_blank" class="featured-card">
+            ${imageHtml}
+            <div class="featured-content">
+              ${badgeRow}
+              ${subtitleHtml}
+              <h4 class="featured-title">${item.title}</h4>
+              <p class="featured-desc">${item.description || ''}</p>
+              <button class="featured-btn">
+                ${actionLabel}
+                <span class="material-symbols-outlined fs-6">arrow_forward</span>
+              </button>
+            </div>
+          </a>
+        </div>
+      `;
+    }).join('');
+    
+    const titleHtml = title ? `<h3 class="section-title mb-3 fs-5 fw-bold font-brand text-secondary-emphasis">${title}</h3>` : '';
+    featuredContainer.innerHTML = `
+      ${titleHtml}
+      <div class="row g-3">
+        ${cardsHtml}
+      </div>
     `;
   }
+
 
   // Render Links List
   const linksListContainer = document.getElementById('links-list-container');
@@ -95,6 +251,55 @@
         iconHtml = `<span class="material-symbols-outlined">${link.icon.name}</span>`;
       } else if (link.icon.type === 'image') {
         iconHtml = `<img src="${link.icon.url}" width="24" height="24" style="object-fit: contain;">`;
+      }
+
+      if (link.isBanner && link.bannerImage) {
+        // Image Banner link tile
+        return `
+          <a href="${link.url}" target="_blank" rel="noopener" class="link-tile link-tile-banner d-flex align-items-center gap-3 p-3 rounded-4 text-decoration-none mb-3" 
+            id="${link.id}" 
+            style="background-image: url('${link.bannerImage}');">
+            <span class="link-tile-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
+              ${iconHtml}
+            </span>
+            <span class="link-tile-content d-flex flex-column align-items-start flex-grow-1">
+              <span class="link-tile-label fw-bold">${link.label}</span>
+              <span class="link-tile-subtitle">${link.subtitle}</span>
+            </span>
+            <span class="material-symbols-outlined link-tile-arrow">chevron_right</span>
+          </a>
+        `;
+      }
+
+      if (link.embedUrl) {
+        // Video/Audio Embed link tile (expandable iframe)
+        const collapseId = `collapse-embed-${link.id || 'embed-' + index}`;
+        return `
+          <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
+            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
+              type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#${collapseId}" 
+              aria-expanded="false" 
+              aria-controls="${collapseId}">
+              <span class="link-tile-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
+                ${iconHtml}
+              </span>
+              <span class="link-tile-content d-flex flex-column align-items-start flex-grow-1">
+                <span class="link-tile-label fw-bold">${link.label}</span>
+                <span class="link-tile-subtitle text-muted">${link.subtitle}</span>
+              </span>
+              <span class="material-symbols-outlined link-tile-arrow toggle-chevron">expand_more</span>
+            </button>
+            <div class="collapse" id="${collapseId}">
+              <div class="px-3 pb-3 pt-2 bg-light border-top">
+                <div class="embed-container ratio ratio-16x9">
+                  <iframe src="${link.embedUrl}" allowfullscreen loading="lazy" style="border: 0;"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
       }
 
       if (link.sublinks) {
@@ -167,8 +372,8 @@
   const footerContainer = document.getElementById('footer-container');
   if (footerContainer && config.footer) {
     footerContainer.innerHTML = `
-      <p class="m-0 d-flex align-items-center justify-content-center gap-1 text-muted opacity-75">
-        &copy; ${config.footer.year} · ${config.footer.text} <span class="material-symbols-outlined footer-heart fs-6 text-danger">favorite</span>
+      <p class="m-0 d-flex align-items-center justify-content-center gap-1 text-muted opacity-75 flex-wrap">
+        &copy; ${config.footer.year} · ${config.footer.text} <span class="material-symbols-outlined footer-heart fs-6 text-danger mx-1">favorite</span> by <a href="https://github.com/shazee-04/beacon" target="_blank" class="text-muted text-decoration-underline ms-1">shazee</a>
       </p>
     `;
   }

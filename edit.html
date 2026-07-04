@@ -35,8 +35,10 @@
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-tab="profile"><span class="material-symbols-outlined">person</span> Profile</button>
+        <button class="nav-btn" data-tab="theme"><span class="material-symbols-outlined">brush</span> Theme</button>
         <button class="nav-btn" data-tab="skills"><span class="material-symbols-outlined">palette</span> Skills</button>
         <button class="nav-btn" data-tab="socials"><span class="material-symbols-outlined">share</span> Socials</button>
+        <button class="nav-btn" data-tab="featured"><span class="material-symbols-outlined">featured_play_list</span> Featured</button>
         <button class="nav-btn" data-tab="links"><span class="material-symbols-outlined">link</span> Links</button>
         <button class="nav-btn" data-tab="cta-footer"><span class="material-symbols-outlined">call_to_action</span> CTA</button>
         <button class="nav-btn" data-tab="settings"><span class="material-symbols-outlined">settings</span> Settings</button>
@@ -77,6 +79,102 @@
         </div>
       </div>
 
+      <!-- Theme Tab -->
+      <div id="theme" class="tab-pane">
+        <header class="pane-header">
+          <h3>Theme Settings</h3>
+          <p>Customize the look and feel of your bio page.</p>
+        </header>
+        <div class="form-group">
+          <label>Theme Preset</label>
+          <select id="theme-preset" onchange="handleThemePresetChange(this.value)">
+            <option value="deep-indigo">Deep Indigo (Default)</option>
+            <option value="sunset-peach">Sunset Peach</option>
+            <option value="emerald-sage">Emerald Sage</option>
+            <option value="midnight-tech">Midnight Tech (Dark)</option>
+            <option value="monochrome-ink">Monochrome Ink</option>
+            <option value="custom">Custom Theme</option>
+          </select>
+        </div>
+        
+        <div id="custom-theme-colors" style="display: none;">
+          <h4 style="margin: 24px 0 12px 0; font-size: 1rem; font-weight: 600;">Custom Colors</h4>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Primary Brand Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-primary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('primary', this.value)">
+                <input type="text" id="theme-primary" style="flex: 1;" onchange="updateCustomColor('primary', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Primary Hover Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-primaryHover-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('primaryHover', this.value)">
+                <input type="text" id="theme-primaryHover" style="flex: 1;" onchange="updateCustomColor('primaryHover', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Secondary Accent Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-secondary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('secondary', this.value)">
+                <input type="text" id="theme-secondary" style="flex: 1;" onchange="updateCustomColor('secondary', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Tertiary Mesh Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-tertiary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('tertiary', this.value)">
+                <input type="text" id="theme-tertiary" style="flex: 1;" onchange="updateCustomColor('tertiary', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Background Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-bg-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('bg', this.value)">
+                <input type="text" id="theme-bg" style="flex: 1;" onchange="updateCustomColor('bg', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Card Background</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-cardBg-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('cardBg', this.value)">
+                <input type="text" id="theme-cardBg" style="flex: 1;" onchange="updateCustomColor('cardBg', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Border Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-border-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('border', this.value)">
+                <input type="text" id="theme-border" style="flex: 1;" onchange="updateCustomColor('border', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Text Main Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-textMain-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('textMain', this.value)">
+                <input type="text" id="theme-textMain" style="flex: 1;" onchange="updateCustomColor('textMain', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Text Muted Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-textMuted-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('textMuted', this.value)">
+                <input type="text" id="theme-textMuted" style="flex: 1;" onchange="updateCustomColor('textMuted', this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Skills Tab -->
       <div id="skills" class="tab-pane">
         <header class="pane-header">
@@ -101,6 +199,22 @@
         </button>
       </div>
 
+      <!-- Featured Tab -->
+      <div id="featured" class="tab-pane">
+        <header class="pane-header">
+          <h3>Featured Items</h3>
+          <p>Highlight your best projects or products in a rich grid layout.</p>
+        </header>
+        <div class="form-group">
+          <label>Featured Section Title</label>
+          <input type="text" id="featured-title-input" placeholder="e.g. Featured Projects">
+        </div>
+        <div id="featured-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3" id="add-featured">
+          <span class="material-symbols-outlined">add</span> Add Featured Item
+        </button>
+      </div>
+
       <!-- Links Tab -->
       <div id="links" class="tab-pane">
         <header class="pane-header">
@@ -116,21 +230,13 @@
       <!-- CTA & Footer Tab -->
       <div id="cta-footer" class="tab-pane">
         <header class="pane-header">
-          <h3>CTA Button</h3>
-          <p>The primary call to action on your profile card.</p>
+          <h3>CTA Buttons</h3>
+          <p>Manage the Call-To-Action buttons on your profile card.</p>
         </header>
-        <div class="form-group">
-          <label>CTA Label</label>
-          <input type="text" id="cta-label">
-        </div>
-        <div class="form-group">
-          <label>CTA URL</label>
-          <input type="text" id="cta-url">
-        </div>
-        <div class="form-group">
-          <label>CTA Icon (Material Name)</label>
-          <input type="text" id="cta-icon">
-        </div>
+        <div id="ctas-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3 mb-5" id="add-cta">
+          <span class="material-symbols-outlined">add</span> Add CTA Button
+        </button>
 
         <header class="pane-header mt-5">
           <h3>Footer</h3>
