@@ -20,7 +20,7 @@ if (currentConfig.cta && currentConfig.ctas.length === 0) {
 function switchTab(tabId) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-  
+
   const btn = document.querySelector(`.nav-btn[data-tab="${tabId}"]`);
   if (btn) btn.classList.add('active');
   const pane = document.getElementById(tabId);
@@ -102,7 +102,7 @@ function renderSocials() {
     if (type === 'svg') iconValue = social.icon.path;
     else if (type === 'image') iconValue = social.icon.url;
     else iconValue = social.icon.name;
-    
+
     let iconInputHtml = '';
     if (type === 'image') {
       iconInputHtml = `
@@ -223,6 +223,7 @@ function renderLinks() {
     if (link.sublinks) linkType = 'sublinks';
     else if (link.embedUrl) linkType = 'embed';
     else if (link.isBanner) linkType = 'banner';
+    else if (link.isExpandableCard) linkType = 'expandableCard';
 
     // Build specific options based on type
     let typeConfigHtml = '';
@@ -244,6 +245,10 @@ function renderLinks() {
             <small id="sublink-status-${index}-${sidx}" style="display:block; margin-bottom:12px; color:var(--primary); font-weight:500;"></small>
           `).join('')}
           <button class="btn btn-secondary btn-sm mt-2" onclick="addSublink(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Sublink</button>
+          <div class="form-group mt-3" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="expandable-default-${index}" ${link.expandedByDefault ? 'checked' : ''} onchange="updateLink(${index}, 'expandedByDefault', this.checked)">
+            <label for="expandable-default-${index}" style="margin-bottom:0; cursor:pointer;">Expanded by default on load</label>
+          </div>
         </div>
       `;
     } else if (linkType === 'embed') {
@@ -252,6 +257,10 @@ function renderLinks() {
           <label>Embed Player URL (YouTube, Spotify, Vimeo, etc.)</label>
           <input type="text" value="${link.embedUrl || ''}" placeholder="e.g. https://www.youtube.com/embed/dQw4w9WgXcQ" onchange="updateLink(${index}, 'embedUrl', this.value)">
           <small style="color: var(--text-muted); font-size: 0.8rem; display:block; margin-top:4px;">Must be the embeddable version (e.g. contains '/embed/').</small>
+        </div>
+        <div class="form-group mb-3" style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="expandable-default-${index}" ${link.expandedByDefault ? 'checked' : ''} onchange="updateLink(${index}, 'expandedByDefault', this.checked)">
+          <label for="expandable-default-${index}" style="margin-bottom:0; cursor:pointer;">Expanded by default on load</label>
         </div>
       `;
     } else if (linkType === 'banner') {
@@ -268,6 +277,32 @@ function renderLinks() {
             <button class="btn btn-secondary" onclick="document.getElementById('link-banner-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
           </div>
           <small id="link-banner-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+        </div>
+      `;
+    } else if (linkType === 'expandableCard') {
+      typeConfigHtml = `
+        <div class="expandable-items-container">
+          <h6>Expandable Image Cards</h6>
+          ${(link.expandableItems || []).map((item, iIdx) => `
+            <div class="expandable-item" style="border: 1px solid var(--border); padding: 12px; border-radius: 8px; margin-bottom: 12px; display:flex; flex-direction:column; gap:8px;">
+              <input type="text" placeholder="Card Title" value="${item.title || ''}" onchange="updateExpandableItem(${index}, ${iIdx}, 'title', this.value)">
+              <textarea placeholder="Card Description" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; resize: vertical;" onchange="updateExpandableItem(${index}, ${iIdx}, 'desc', this.value)">${item.desc || ''}</textarea>
+              <input type="text" placeholder="Card URL (Optional)" value="${item.url || ''}" onchange="updateExpandableItem(${index}, ${iIdx}, 'url', this.value)">
+              <div style="display:flex; gap:8px;">
+                <input type="text" placeholder="Image URL" value="${item.image || ''}" onchange="updateExpandableItem(${index}, ${iIdx}, 'image', this.value)" id="link-expandable-url-${index}-${iIdx}" style="flex:1">
+                <input type="file" id="link-expandable-file-${index}-${iIdx}" accept="image/*" style="display:none" onchange="handleLinkExpandableUpload(event, ${index}, ${iIdx})">
+                <button class="btn btn-secondary" onclick="document.getElementById('link-expandable-file-${index}-${iIdx}').click()" title="Upload Image"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+              </div>
+              <small id="link-expandable-status-${index}-${iIdx}" style="color:var(--primary);"></small>
+              <button class="btn btn-sm btn-outline-danger mt-2" onclick="deleteExpandableItem(${index}, ${iIdx})" style="align-self: flex-end;">Remove Card</button>
+            </div>
+          `).join('')}
+          <button class="btn btn-secondary btn-sm mb-3" onclick="addExpandableItem(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Card</button>
+          
+          <div class="form-group mb-3" style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="expandable-default-${index}" ${link.expandedByDefault ? 'checked' : ''} onchange="updateLink(${index}, 'expandedByDefault', this.checked)">
+            <label for="expandable-default-${index}" style="margin-bottom:0; cursor:pointer;">Expanded by default on load</label>
+          </div>
         </div>
       `;
     } else {
@@ -295,6 +330,7 @@ function renderLinks() {
             <option value="standard" ${linkType === 'standard' ? 'selected' : ''}>Standard Link</option>
             <option value="embed" ${linkType === 'embed' ? 'selected' : ''}>Expandable Embed Player</option>
             <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
+            <option value="expandableCard" ${linkType === 'expandableCard' ? 'selected' : ''}>Expandable Image Card</option>
             <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
           </select>
         </div>
@@ -360,7 +396,11 @@ window.changeLinkType = (index, type) => {
   delete link.embedUrl;
   delete link.isBanner;
   delete link.bannerImage;
-  
+  delete link.isExpandableCard;
+  delete link.expandableItems;
+  delete link.expandedByDefault;
+  delete link.expandedByDefault;
+
   if (type === 'sublinks') {
     link.sublinks = [];
   } else if (type === 'embed') {
@@ -368,6 +408,11 @@ window.changeLinkType = (index, type) => {
   } else if (type === 'banner') {
     link.isBanner = true;
     link.bannerImage = '';
+    link.url = 'https://';
+  } else if (type === 'expandableCard') {
+    link.isExpandableCard = true;
+    link.expandedByDefault = false;
+    link.expandableItems = [];
     link.url = 'https://';
   } else {
     link.url = 'https://';
@@ -386,6 +431,22 @@ window.deleteSublink = (lIdx, sIdx) => {
   currentConfig.links[lIdx].sublinks.splice(sIdx, 1);
   if (currentConfig.links[lIdx].sublinks.length === 0) {
     delete currentConfig.links[lIdx].sublinks;
+  }
+  renderLinks();
+};
+
+window.addExpandableItem = (index) => {
+  if (!currentConfig.links[index].expandableItems) currentConfig.links[index].expandableItems = [];
+  currentConfig.links[index].expandableItems.push({ title: 'New Card', desc: '', image: '', url: '' });
+  renderLinks();
+};
+window.updateExpandableItem = (lIdx, iIdx, key, val) => {
+  currentConfig.links[lIdx].expandableItems[iIdx][key] = val;
+};
+window.deleteExpandableItem = (lIdx, iIdx) => {
+  currentConfig.links[lIdx].expandableItems.splice(iIdx, 1);
+  if (currentConfig.links[lIdx].expandableItems.length === 0) {
+    delete currentConfig.links[lIdx].expandableItems;
   }
   renderLinks();
 };
@@ -415,7 +476,7 @@ document.getElementById('btn-copy').addEventListener('click', () => {
     alert("Please generate the code first!");
     return;
   }
-  
+
   navigator.clipboard.writeText(codeEl.value).then(() => {
     const btn = document.getElementById('btn-copy');
     const originalText = btn.innerHTML;
@@ -479,7 +540,7 @@ window.APP_CONFIG = ${JSON.stringify(currentConfig, null, 2)};
 
   try {
     statusEl.textContent = 'Fetching current file status...';
-    
+
     // 1. Get the current file's SHA (required to update it)
     const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
     const getRes = await fetch(fileUrl, {
@@ -546,7 +607,7 @@ async function uploadFileToGitHub(file, path) {
   );
 
   const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/${path}`;
-  
+
   // Try to get existing file SHA (in case of overwrite)
   let sha = null;
   const getRes = await fetch(fileUrl, {
@@ -576,9 +637,27 @@ async function uploadFileToGitHub(file, path) {
     const err = await putRes.json();
     throw new Error(err.message || 'Upload failed');
   }
-  
+
   return path;
 }
+
+// Expandable Image File Upload
+window.handleLinkExpandableUpload = async (e, index, itemIndex) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById(`link-expandable-status-${index}-${itemIndex}`);
+  statusEl.textContent = 'Uploading...';
+  try {
+    const path = `links/expandable/${Date.now()}-${file.name.replace(/\\s+/g, '-')}`;
+    await uploadFileToGitHub(file, path);
+    currentConfig.links[index].expandableItems[itemIndex].image = path;
+    document.getElementById(`link-expandable-url-${index}-${itemIndex}`).value = path;
+    statusEl.textContent = 'Upload successful!';
+    setTimeout(() => statusEl.textContent = '', 3000);
+  } catch (err) {
+    statusEl.textContent = `Error: ${err.message}`;
+  }
+};
 
 // Avatar File Upload
 document.getElementById('prof-avatar-file')?.addEventListener('change', async (e) => {
@@ -812,7 +891,7 @@ function renderTheme() {
   const presetSelect = document.getElementById('theme-preset');
   if (!presetSelect) return;
   presetSelect.value = currentConfig.theme.preset || 'deep-indigo';
-  
+
   const customDiv = document.getElementById('custom-theme-colors');
   if (currentConfig.theme.preset === 'custom') {
     customDiv.style.display = 'block';
@@ -829,7 +908,7 @@ function renderTheme() {
         textMuted: "#787680"
       };
     }
-    
+
     const colors = currentConfig.theme.customColors;
     const keys = ['primary', 'primaryHover', 'secondary', 'tertiary', 'bg', 'cardBg', 'border', 'textMain', 'textMuted'];
     keys.forEach(key => {
@@ -854,7 +933,7 @@ window.updateCustomColor = (key, val) => {
     currentConfig.theme.customColors = {};
   }
   currentConfig.theme.customColors[key] = val;
-  
+
   const textEl = document.getElementById(`theme-${key}`);
   const pickerEl = document.getElementById(`theme-${key}-picker`);
   if (textEl && textEl.value !== val) textEl.value = val;

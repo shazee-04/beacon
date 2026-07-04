@@ -92,7 +92,7 @@
       root.style.setProperty('--border-color', colors.border);
       if (colors.textMain) root.style.setProperty('--text-main', colors.textMain);
       if (colors.textMuted) root.style.setProperty('--text-muted', colors.textMuted);
-      
+
       if (themeConfig.preset === 'midnight-tech') {
         document.body.classList.add('dark-theme');
       } else {
@@ -167,19 +167,19 @@
     } else if (config.cta) {
       ctasList = [config.cta];
     }
-    
+
     if (ctasList.length > 0) {
       ctaContainer.innerHTML = `
         <div class="badge-cta">
           ${ctasList.map(cta => {
-            const styleClass = cta.style === 'secondary' ? 'secondary' : '';
-            return `
+        const styleClass = cta.style === 'secondary' ? 'secondary' : '';
+        return `
               <a href="${cta.url}" target="_blank" class="btn btn-cta ${styleClass} w-100 rounded-pill py-2 px-3 d-inline-flex align-items-center justify-content-center gap-2">
                 ${cta.label}
                 <span class="material-symbols-outlined fs-5">${cta.icon}</span>
               </a>
             `;
-          }).join('')}
+      }).join('')}
         </div>
       `;
     }
@@ -190,6 +190,14 @@
   if (featuredContainer && Array.isArray(config.featured) && config.featured.length > 0) {
     featuredContainer.style.display = 'block';
     const title = config.featuredTitle || '';
+    const totalItems = config.featured.length;
+    let colClass = 'col-12';
+    if (totalItems === 2) {
+      colClass = 'col-sm-6';
+    } else if (totalItems >= 3) {
+      colClass = 'col-md-4 col-sm-6';
+    }
+
     const cardsHtml = config.featured.map(item => {
       const badgeHtml = item.badge ? `<span class="featured-badge">${item.badge}</span>` : '';
       const priceHtml = item.price ? `<span class="featured-price">${item.price}</span>` : '';
@@ -206,9 +214,9 @@
       ` : '';
       const subtitleHtml = item.subtitle ? `<span class="featured-subtitle">${item.subtitle}</span>` : '';
       const actionLabel = item.actionLabel || 'View Project';
-      
+
       return `
-        <div class="col-sm-6">
+        <div class="${colClass}">
           <a href="${item.url}" target="_blank" class="featured-card">
             ${imageHtml}
             <div class="featured-content">
@@ -225,7 +233,7 @@
         </div>
       `;
     }).join('');
-    
+
     const titleHtml = title ? `<h3 class="section-title mb-3 fs-5 fw-bold font-brand text-secondary-emphasis">${title}</h3>` : '';
     featuredContainer.innerHTML = `
       ${titleHtml}
@@ -274,13 +282,16 @@
       if (link.embedUrl) {
         // Video/Audio Embed link tile (expandable iframe)
         const collapseId = `collapse-embed-${link.id || 'embed-' + index}`;
+        const isExpanded = link.expandedByDefault ? 'true' : 'false';
+        const showClass = link.expandedByDefault ? 'show' : '';
+        const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         return `
           <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
             <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
               type="button" 
               data-bs-toggle="collapse" 
               data-bs-target="#${collapseId}" 
-              aria-expanded="false" 
+              aria-expanded="${isExpanded}" 
               aria-controls="${collapseId}">
               <span class="link-tile-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
                 ${iconHtml}
@@ -289,9 +300,9 @@
                 <span class="link-tile-label fw-bold">${link.label}</span>
                 <span class="link-tile-subtitle text-muted">${link.subtitle}</span>
               </span>
-              <span class="material-symbols-outlined link-tile-arrow toggle-chevron">expand_more</span>
+              <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
             </button>
-            <div class="collapse" id="${collapseId}">
+            <div class="collapse ${showClass}" id="${collapseId}">
               <div class="px-3 pb-3 pt-2 bg-light border-top">
                 <div class="embed-container ratio ratio-16x9">
                   <iframe src="${link.embedUrl}" allowfullscreen loading="lazy" style="border: 0;"></iframe>
@@ -301,10 +312,57 @@
           </div>
         `;
       }
+      if (link.isExpandableCard) {
+        // Expandable Image Card link tile
+        const collapseId = `collapse-card-${link.id || 'card-' + index}`;
+        const isExpanded = link.expandedByDefault ? 'true' : 'false';
+        const showClass = link.expandedByDefault ? 'show' : '';
+        const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
+        const itemsHtml = (link.expandableItems || []).map(item => `
+          <${item.url ? `a href="${item.url}" target="_blank" rel="noopener"` : 'div'} class="expandable-card-layout ${item.url ? 'is-link text-decoration-none text-dark' : ''}">
+            <div class="expandable-card-img-wrapper">
+              <img src="${item.image || ''}" loading="lazy" alt="${item.title || 'Image'}" class="expandable-card-img shadow-sm">
+            </div>
+            <div class="expandable-card-text">
+              <h5 class="fw-bold fs-6 font-brand mb-1">${item.title || ''}</h5>
+              <p class="text-muted mb-0 fs-7">${item.desc || ''}</p>
+            </div>
+          </${item.url ? 'a' : 'div'}>
+        `).join('');
+
+        return `
+          <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
+            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
+              type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#${collapseId}" 
+              aria-expanded="${isExpanded}" 
+              aria-controls="${collapseId}">
+              <span class="link-tile-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
+                ${iconHtml}
+              </span>
+              <span class="link-tile-content d-flex flex-column align-items-start flex-grow-1">
+                <span class="link-tile-label fw-bold">${link.label}</span>
+                <span class="link-tile-subtitle text-muted">${link.subtitle}</span>
+              </span>
+              <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
+            </button>
+            <div class="collapse ${showClass}" id="${collapseId}">
+              <div class="px-3 pb-3 pt-3 bg-light border-top d-flex flex-column gap-3">
+                ${itemsHtml}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
 
       if (link.sublinks) {
         // Render collapsible tile group (attached dropdown, unified border wrapper)
         const collapseId = `collapse-${link.id || 'item-' + index}`;
+        const isExpanded = link.expandedByDefault ? 'true' : 'false';
+        const showClass = link.expandedByDefault ? 'show' : '';
+        const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         const sublinksHtml = link.sublinks.map(sub => {
           return `
             <div class="sublink-row d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 rounded-4 bg-white border mb-2 gap-2">
@@ -332,7 +390,7 @@
               type="button" 
               data-bs-toggle="collapse" 
               data-bs-target="#${collapseId}" 
-              aria-expanded="false" 
+              aria-expanded="${isExpanded}" 
               aria-controls="${collapseId}">
               <span class="link-tile-icon d-flex align-items-center justify-content-center rounded-3 flex-shrink-0">
                 ${iconHtml}
@@ -341,9 +399,9 @@
                 <span class="link-tile-label fw-bold">${link.label}</span>
                 <span class="link-tile-subtitle text-muted">${link.subtitle}</span>
               </span>
-              <span class="material-symbols-outlined link-tile-arrow toggle-chevron">expand_more</span>
+              <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
             </button>
-            <div class="collapse" id="${collapseId}">
+            <div class="collapse ${showClass}" id="${collapseId}">
               <div class="px-3 pb-3 pt-2 bg-light border-top">
                 ${sublinksHtml}
               </div>
