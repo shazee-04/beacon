@@ -130,13 +130,32 @@
 
   applyTheme(config.theme);
 
-  // Render Avatar
+  // Set Document Title
+  if (config.profile && config.profile.username) {
+    document.title = `Beacon | @${config.profile.username}`;
+  }
+
+  // Render Avatar and Favicon
   const avatarContainer = document.getElementById('profile-avatar-container');
-  if (avatarContainer && config.profile) {
-    if (config.profile.avatar && config.profile.avatar.length === 1) {
-      avatarContainer.innerHTML = `<span class="badge-monogram">${config.profile.avatar}</span>`;
-    } else if (config.profile.avatar) {
-      avatarContainer.innerHTML = `<img src="${config.profile.avatar}" alt="${config.profile.name}" class="img-fluid rounded-4 w-100 h-100 object-fit-cover">`;
+  if (config.profile && config.profile.avatar) {
+    // Set Favicon
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    
+    if (config.profile.avatar.length === 1) {
+      link.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dominant-baseline="central">${config.profile.avatar}</text></svg>`;
+      if (avatarContainer) {
+        avatarContainer.innerHTML = `<span class="badge-monogram">${config.profile.avatar}</span>`;
+      }
+    } else {
+      link.href = config.profile.avatar;
+      if (avatarContainer) {
+        avatarContainer.innerHTML = `<img src="${config.profile.avatar}" alt="${config.profile.name || ''}" class="img-fluid rounded-4 w-100 h-100 object-fit-cover">`;
+      }
     }
   }
 

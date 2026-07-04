@@ -42,10 +42,27 @@ function bindInput(id, obj, key, isInt = false) {
 }
 
 // Bind Profile
+bindInput('prof-username', currentConfig.profile, 'username');
 bindInput('prof-name', currentConfig.profile, 'name');
 bindInput('prof-title', currentConfig.profile, 'title');
 bindInput('prof-bio', currentConfig.profile, 'bio');
 bindInput('prof-avatar', currentConfig.profile, 'avatar');
+
+// Set Favicon on load
+if (currentConfig.profile && currentConfig.profile.avatar) {
+  let link = document.querySelector("link[rel~='icon']");
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  
+  if (currentConfig.profile.avatar.length === 1) {
+    link.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dominant-baseline="central">${currentConfig.profile.avatar}</text></svg>`;
+  } else {
+    link.href = currentConfig.profile.avatar;
+  }
+}
 
 // Bind Featured Title
 bindInput('featured-title-input', currentConfig, 'featuredTitle');
