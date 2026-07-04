@@ -22,6 +22,16 @@
   /* Easing & Motion */
   --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
   --duration-medium: 300ms;
+
+  /* Bootstrap overrides */
+  --bs-body-bg: var(--bg-color);
+  --bs-body-color: var(--text-main);
+  --bs-primary: var(--primary-color);
+  --bs-border-color: var(--border-color);
+  --bs-card-bg: var(--card-bg);
+  --bs-card-color: var(--text-main);
+  --bs-link-color: var(--primary-color);
+  --bs-secondary-color: var(--text-muted);
 }
 
 /* --- Base Resets & Typography --- */
@@ -33,6 +43,10 @@ body {
   overflow-x: hidden;
   position: relative;
   -webkit-font-smoothing: antialiased;
+}
+
+.text-muted, .text-secondary {
+  color: var(--text-muted) !important;
 }
 
 h1,
@@ -205,9 +219,9 @@ h6,
   width: 100px;
   height: 100px;
   border-radius: 20px;
-  background-color: #E1DFFF;
-  color: #0E006D;
-  border: 3px solid #FFFFFF;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
+  border: 3px solid var(--card-bg);
   transition: transform var(--duration-medium) var(--ease-emphasized);
 }
 
@@ -242,9 +256,9 @@ h6,
 
 /* Chips styling */
 .badge-chip {
-  background-color: #F8F9FA;
+  background-color: color-mix(in srgb, var(--text-main) 4%, transparent);
   border: 1px solid var(--border-color);
-  color: #495057;
+  color: var(--text-muted);
   padding: 6px 12px;
   border-radius: 50px;
   font-size: 0.75rem;
@@ -254,9 +268,9 @@ h6,
 }
 
 .badge-chip:hover {
-  background-color: #E1DFFF;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
   color: var(--primary-color);
-  border-color: #C9C5D0;
+  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
 }
 
 /* Social Buttons */
@@ -269,7 +283,7 @@ h6,
   justify-content: center;
   border-radius: 50% !important;
   border: 1px solid var(--border-color);
-  color: #495057;
+  color: var(--text-muted);
   background-color: transparent;
   transition: all 0.2s ease;
 }
@@ -279,16 +293,16 @@ h6,
 }
 
 .social-btn:hover {
-  background-color: #E1DFFF;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
   color: var(--primary-color);
-  border-color: #C9C5D0;
+  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
   /* transform: translateY(-2px); */
 }
 
 /* CTA Button */
 .btn-cta {
-  background-color: #E2E0F9;
-  color: #1A1A2C;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
   border: none;
   font-weight: 600;
   transition: all 0.2s ease;
@@ -317,7 +331,7 @@ h6,
 
 .link-tile:hover {
   border-color: var(--primary-color) !important;
-  box-shadow: 0 8px 24px rgba(75, 71, 183, 0.06);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary-color) 6%, transparent);
 }
 
 .link-tile:active {
@@ -327,14 +341,14 @@ h6,
 .link-tile-icon {
   width: 48px;
   height: 48px;
-  background-color: #F0ECF4;
+  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
   color: var(--primary-color);
   transition: background-color var(--duration-medium) var(--ease-emphasized),
     color var(--duration-medium) var(--ease-emphasized);
 }
 
 .link-tile:hover .link-tile-icon {
-  background-color: #E1DFFF;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
   color: var(--primary-hover);
 }
 
@@ -416,13 +430,23 @@ h6,
 
 /* --- Collapsible Sublinks --- */
 .link-tile-group {
+  background-color: var(--card-bg);
   transition: box-shadow var(--duration-medium) var(--ease-emphasized),
     border-color var(--duration-medium) var(--ease-emphasized);
 }
 
 .link-tile-group:hover {
   border-color: var(--primary-color) !important;
-  box-shadow: 0 8px 24px rgba(75, 71, 183, 0.06);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary-color) 6%, transparent);
+}
+
+/* Subtle primary tint for expandable header button when expanded */
+.link-tile[aria-expanded="true"] {
+  background-color: color-mix(in srgb, var(--primary-color) 4%, var(--card-bg)) !important;
+}
+
+.link-tile-expanded-content {
+  background-color: color-mix(in srgb, var(--text-main) 2%, var(--card-bg));
 }
 
 .sublink-row {
@@ -431,7 +455,7 @@ h6,
 }
 
 .sublink-row:hover {
-  border-color: #C9C5D0 !important;
+  border-color: color-mix(in srgb, var(--text-main) 20%, transparent) !important;
   /* transform: translateY(-1px); */
 }
 
@@ -445,9 +469,9 @@ h6,
 }
 
 .btn-sublink-action:hover {
-  background-color: #E2E0F9;
-  color: #1A1A2C;
-  border-color: #C9C5D0;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
+  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
 }
 
 .btn-sublink-primary {
@@ -461,7 +485,7 @@ h6,
 .btn-sublink-primary:hover {
   background-color: var(--primary-hover);
   color: #FFFFFF;
-  box-shadow: 0 4px 10px rgba(75, 71, 183, 0.2);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary-color) 20%, transparent);
 }
 
 /* Chevron Rotation */
@@ -533,13 +557,9 @@ h6,
 }
 
 .btn-cta.secondary:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: color-mix(in srgb, var(--text-main) 4%, transparent);
   color: var(--primary-color);
   border-color: var(--primary-color);
-}
-
-.dark-theme .btn-cta.secondary:hover {
-  background-color: rgba(255, 255, 255, 0.04);
 }
 
 /* --- Featured Items Section --- */
@@ -561,7 +581,7 @@ h6,
 
 .featured-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(75, 71, 183, 0.06);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary-color) 6%, transparent);
   border-color: var(--primary-color);
 }
 
@@ -605,7 +625,7 @@ h6,
   letter-spacing: 0.05em;
   padding: 2px 8px;
   border-radius: 4px;
-  background-color: rgba(75, 71, 183, 0.1);
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
   color: var(--primary-color);
 }
 

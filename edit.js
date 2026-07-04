@@ -50,10 +50,6 @@ bindInput('prof-avatar', currentConfig.profile, 'avatar');
 // Bind Featured Title
 bindInput('featured-title-input', currentConfig, 'featuredTitle');
 
-// Bind Footer
-bindInput('footer-year', currentConfig.footer, 'year', true);
-bindInput('footer-text', currentConfig.footer, 'text');
-
 
 // --- Render Skills ---
 function renderSkills() {
@@ -63,20 +59,25 @@ function renderSkills() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-header">
-        <div class="list-item-title">Skill ${index + 1}</div>
+      <div class="list-item-header ${skill._isExpanded ? '' : 'collapsed'}" onclick="toggleCollapse(this, 'skills', ${index})">
+        <div style="display:flex; align-items:center;">
+          <span class="drag-handle material-symbols-outlined" onclick="event.stopPropagation()">drag_indicator</span>
+          <div class="list-item-title">${skill.label || `Skill ${index + 1}`}</div>
+        </div>
         <div class="list-item-actions">
-          <button class="btn-icon delete" onclick="deleteSkill(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+          <button class="btn-icon delete" onclick="deleteSkill(${index}); event.stopPropagation();" title="Delete"><span class="material-symbols-outlined">delete</span></button>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="form-group mb-0">
-          <label>Label</label>
-          <input type="text" value="${skill.label}" onchange="updateSkill(${index}, 'label', this.value)">
-        </div>
-        <div class="form-group mb-0">
-          <label>Icon (Material Name)</label>
-          <input type="text" value="${skill.icon}" onchange="updateSkill(${index}, 'icon', this.value)">
+      <div class="list-item-body ${skill._isExpanded ? '' : 'collapsed'}">
+        <div class="grid-2">
+          <div class="form-group mb-0">
+            <label>Label</label>
+            <input type="text" value="${skill.label}" onchange="updateSkill(${index}, 'label', this.value)">
+          </div>
+          <div class="form-group mb-0">
+            <label>Icon (Material Name)</label>
+            <input type="text" value="${skill.icon}" onchange="updateSkill(${index}, 'icon', this.value)">
+          </div>
         </div>
       </div>
     `;
@@ -87,7 +88,7 @@ function renderSkills() {
 window.deleteSkill = (index) => { currentConfig.skills.splice(index, 1); renderSkills(); };
 window.updateSkill = (index, key, val) => { currentConfig.skills[index][key] = val; };
 document.getElementById('add-skill').addEventListener('click', () => {
-  currentConfig.skills.push({ label: 'New Skill', icon: 'star' });
+  currentConfig.skills.push({ _isExpanded: true, label: 'New Skill', icon: 'star' });
   renderSkills();
 });
 
@@ -124,37 +125,42 @@ function renderSocials() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-header">
-        <div class="list-item-title">${social.label || 'New Social'}</div>
+      <div class="list-item-header ${social._isExpanded ? '' : 'collapsed'}" onclick="toggleCollapse(this, 'socials', ${index})">
+        <div style="display:flex; align-items:center;">
+          <span class="drag-handle material-symbols-outlined" onclick="event.stopPropagation()">drag_indicator</span>
+          <div class="list-item-title">${social.label || 'New Social'}</div>
+        </div>
         <div class="list-item-actions">
-          <button class="btn-icon delete" onclick="deleteSocial(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+          <button class="btn-icon delete" onclick="deleteSocial(${index}); event.stopPropagation();" title="Delete"><span class="material-symbols-outlined">delete</span></button>
         </div>
       </div>
-      <div class="grid-2">
+      <div class="list-item-body ${social._isExpanded ? '' : 'collapsed'}">
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>ID (Optional)</label>
+            <input type="text" value="${social.id || ''}" onchange="updateSocial(${index}, 'id', this.value)">
+          </div>
+          <div class="form-group mb-3">
+            <label>Label</label>
+            <input type="text" value="${social.label || ''}" onchange="updateSocial(${index}, 'label', this.value)">
+          </div>
+        </div>
         <div class="form-group mb-3">
-          <label>ID (Optional)</label>
-          <input type="text" value="${social.id || ''}" onchange="updateSocial(${index}, 'id', this.value)">
+          <label>URL</label>
+          <input type="text" value="${social.url || ''}" onchange="updateSocial(${index}, 'url', this.value)">
         </div>
-        <div class="form-group mb-3">
-          <label>Label</label>
-          <input type="text" value="${social.label || ''}" onchange="updateSocial(${index}, 'label', this.value)">
-        </div>
-      </div>
-      <div class="form-group mb-3">
-        <label>URL</label>
-        <input type="text" value="${social.url || ''}" onchange="updateSocial(${index}, 'url', this.value)">
-      </div>
-      <div class="grid-2">
-        <div class="form-group mb-0">
-          <label>Icon Type</label>
-          <select onchange="updateSocialIconType(${index}, this.value)">
-            <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
-            <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
-            <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
-          </select>
-        </div>
-        <div class="form-group mb-0">
-          ${iconInputHtml}
+        <div class="grid-2">
+          <div class="form-group mb-0">
+            <label>Icon Type</label>
+            <select onchange="updateSocialIconType(${index}, this.value)">
+              <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
+              <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
+              <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
+            </select>
+          </div>
+          <div class="form-group mb-0">
+            ${iconInputHtml}
+          </div>
         </div>
       </div>
     `;
@@ -184,7 +190,7 @@ window.updateSocialIconValue = (index, val) => {
   }
 };
 document.getElementById('add-social').addEventListener('click', () => {
-  currentConfig.socials.push({ id: '', label: 'New Social', url: 'https://', icon: { type: 'material', name: 'link' } });
+  currentConfig.socials.push({ _isExpanded: true, id: '', label: 'New Social', url: 'https://', icon: { type: 'material', name: 'link' } });
   renderSocials();
 });
 
@@ -317,52 +323,57 @@ function renderLinks() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-header">
-        <div class="list-item-title">${link.label || 'New Link'}</div>
+      <div class="list-item-header ${link._isExpanded ? '' : 'collapsed'}" onclick="toggleCollapse(this, 'links', ${index})">
+        <div style="display:flex; align-items:center;">
+          <span class="drag-handle material-symbols-outlined" onclick="event.stopPropagation()">drag_indicator</span>
+          <div class="list-item-title">${link.label || 'New Link'}</div>
+        </div>
         <div class="list-item-actions">
-          <button class="btn-icon delete" onclick="deleteLink(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+          <button class="btn-icon delete" onclick="deleteLink(${index}); event.stopPropagation();" title="Delete"><span class="material-symbols-outlined">delete</span></button>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="form-group mb-3">
-          <label>Link Type</label>
-          <select onchange="changeLinkType(${index}, this.value)">
-            <option value="standard" ${linkType === 'standard' ? 'selected' : ''}>Standard Link</option>
-            <option value="embed" ${linkType === 'embed' ? 'selected' : ''}>Expandable Embed Player</option>
-            <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
-            <option value="expandableCard" ${linkType === 'expandableCard' ? 'selected' : ''}>Expandable Image Card</option>
-            <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
-          </select>
+      <div class="list-item-body ${link._isExpanded ? '' : 'collapsed'}">
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>Link Type</label>
+            <select onchange="changeLinkType(${index}, this.value)">
+              <option value="standard" ${linkType === 'standard' ? 'selected' : ''}>Standard Link</option>
+              <option value="embed" ${linkType === 'embed' ? 'selected' : ''}>Expandable Embed Player</option>
+              <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
+              <option value="expandableCard" ${linkType === 'expandableCard' ? 'selected' : ''}>Expandable Image Card</option>
+              <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
+            </select>
+          </div>
+          <div class="form-group mb-3">
+            <label>ID (Optional)</label>
+            <input type="text" value="${link.id || ''}" onchange="updateLink(${index}, 'id', this.value)">
+          </div>
         </div>
-        <div class="form-group mb-3">
-          <label>ID (Optional)</label>
-          <input type="text" value="${link.id || ''}" onchange="updateLink(${index}, 'id', this.value)">
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>Label</label>
+            <input type="text" value="${link.label || ''}" onchange="updateLink(${index}, 'label', this.value)">
+          </div>
+          <div class="form-group mb-3">
+            <label>Subtitle / Description</label>
+            <input type="text" value="${link.subtitle || ''}" onchange="updateLink(${index}, 'subtitle', this.value)">
+          </div>
         </div>
+        <div class="grid-2" style="margin-bottom: 20px;">
+          <div class="form-group mb-0">
+            <label>Icon Type</label>
+            <select onchange="updateLinkIconType(${index}, this.value)">
+              <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
+              <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
+              <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
+            </select>
+          </div>
+          <div class="form-group mb-0">
+            ${iconInputHtml}
+          </div>
+        </div>
+        ${typeConfigHtml}
       </div>
-      <div class="grid-2">
-        <div class="form-group mb-3">
-          <label>Label</label>
-          <input type="text" value="${link.label || ''}" onchange="updateLink(${index}, 'label', this.value)">
-        </div>
-        <div class="form-group mb-3">
-          <label>Subtitle / Description</label>
-          <input type="text" value="${link.subtitle || ''}" onchange="updateLink(${index}, 'subtitle', this.value)">
-        </div>
-      </div>
-      <div class="grid-2" style="margin-bottom: 20px;">
-        <div class="form-group mb-0">
-          <label>Icon Type</label>
-          <select onchange="updateLinkIconType(${index}, this.value)">
-            <option value="material" ${type === 'material' ? 'selected' : ''}>Material Symbol</option>
-            <option value="svg" ${type === 'svg' ? 'selected' : ''}>SVG Path</option>
-            <option value="image" ${type === 'image' ? 'selected' : ''}>Image/SVG (Upload or Link)</option>
-          </select>
-        </div>
-        <div class="form-group mb-0">
-          ${iconInputHtml}
-        </div>
-      </div>
-      ${typeConfigHtml}
     `;
     container.appendChild(item);
   });
@@ -452,7 +463,7 @@ window.deleteExpandableItem = (lIdx, iIdx) => {
 };
 
 document.getElementById('add-link').addEventListener('click', () => {
-  currentConfig.links.push({ id: '', label: 'New Link', subtitle: 'Link description', url: 'https://', icon: { type: 'material', name: 'link' } });
+  currentConfig.links.push({ _isExpanded: true, id: '', label: 'New Link', subtitle: 'Link description', url: 'https://', icon: { type: 'material', name: 'link' } });
   renderLinks();
 });
 
@@ -777,33 +788,38 @@ function renderCtas() {
     const item = document.createElement('div');
     item.className = 'list-item';
     item.innerHTML = `
-      <div class="list-item-header">
-        <div class="list-item-title">CTA Button ${index + 1}</div>
+      <div class="list-item-header ${cta._isExpanded ? '' : 'collapsed'}" onclick="toggleCollapse(this, 'ctas', ${index})">
+        <div style="display:flex; align-items:center;">
+          <span class="drag-handle material-symbols-outlined" onclick="event.stopPropagation()">drag_indicator</span>
+          <div class="list-item-title">${cta.label || `CTA Button ${index + 1}`}</div>
+        </div>
         <div class="list-item-actions">
-          <button class="btn-icon delete" onclick="deleteCta(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+          <button class="btn-icon delete" onclick="deleteCta(${index}); event.stopPropagation();" title="Delete"><span class="material-symbols-outlined">delete</span></button>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="form-group mb-3">
-          <label>Label</label>
-          <input type="text" value="${cta.label || ''}" onchange="updateCta(${index}, 'label', this.value)">
+      <div class="list-item-body ${cta._isExpanded ? '' : 'collapsed'}">
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>Label</label>
+            <input type="text" value="${cta.label || ''}" onchange="updateCta(${index}, 'label', this.value)">
+          </div>
+          <div class="form-group mb-3">
+            <label>URL</label>
+            <input type="text" value="${cta.url || ''}" onchange="updateCta(${index}, 'url', this.value)">
+          </div>
         </div>
-        <div class="form-group mb-3">
-          <label>URL</label>
-          <input type="text" value="${cta.url || ''}" onchange="updateCta(${index}, 'url', this.value)">
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="form-group mb-0">
-          <label>Icon (Material Name)</label>
-          <input type="text" value="${cta.icon || ''}" onchange="updateCta(${index}, 'icon', this.value)">
-        </div>
-        <div class="form-group mb-0">
-          <label>Button Style</label>
-          <select onchange="updateCta(${index}, 'style', this.value)">
-            <option value="primary" ${cta.style !== 'secondary' ? 'selected' : ''}>Primary (Solid)</option>
-            <option value="secondary" ${cta.style === 'secondary' ? 'selected' : ''}>Secondary (Outlined)</option>
-          </select>
+        <div class="grid-2">
+          <div class="form-group mb-0">
+            <label>Icon (Material Name)</label>
+            <input type="text" value="${cta.icon || ''}" onchange="updateCta(${index}, 'icon', this.value)">
+          </div>
+          <div class="form-group mb-0">
+            <label>Button Style</label>
+            <select onchange="updateCta(${index}, 'style', this.value)">
+              <option value="primary" ${cta.style !== 'secondary' ? 'selected' : ''}>Primary (Solid)</option>
+              <option value="secondary" ${cta.style === 'secondary' ? 'selected' : ''}>Secondary (Outlined)</option>
+            </select>
+          </div>
         </div>
       </div>
     `;
@@ -813,7 +829,7 @@ function renderCtas() {
 window.deleteCta = (index) => { currentConfig.ctas.splice(index, 1); renderCtas(); };
 window.updateCta = (index, key, val) => { currentConfig.ctas[index][key] = val; };
 document.getElementById('add-cta').addEventListener('click', () => {
-  currentConfig.ctas.push({ label: 'New CTA', url: 'https://', icon: 'link', style: 'primary' });
+  currentConfig.ctas.push({ _isExpanded: true, label: 'New CTA', url: 'https://', icon: 'link', style: 'primary' });
   renderCtas();
 });
 
@@ -826,53 +842,58 @@ function renderFeatured() {
     const el = document.createElement('div');
     el.className = 'list-item';
     el.innerHTML = `
-      <div class="list-item-header">
-        <div class="list-item-title">Featured Item ${index + 1}</div>
+      <div class="list-item-header ${item._isExpanded ? '' : 'collapsed'}" onclick="toggleCollapse(this, 'featured', ${index})">
+        <div style="display:flex; align-items:center;">
+          <span class="drag-handle material-symbols-outlined" onclick="event.stopPropagation()">drag_indicator</span>
+          <div class="list-item-title">${item.title || `Featured Item ${index + 1}`}</div>
+        </div>
         <div class="list-item-actions">
-          <button class="btn-icon delete" onclick="deleteFeatured(${index})" title="Delete"><span class="material-symbols-outlined">delete</span></button>
+          <button class="btn-icon delete" onclick="deleteFeatured(${index}); event.stopPropagation();" title="Delete"><span class="material-symbols-outlined">delete</span></button>
         </div>
       </div>
-      <div class="grid-2">
-        <div class="form-group mb-3">
-          <label>Title</label>
-          <input type="text" value="${item.title || ''}" onchange="updateFeatured(${index}, 'title', this.value)">
-        </div>
-        <div class="form-group mb-3">
-          <label>Subtitle / Category</label>
-          <input type="text" value="${item.subtitle || ''}" onchange="updateFeatured(${index}, 'subtitle', this.value)">
-        </div>
-      </div>
-      <div class="form-group mb-3">
-        <label>Description</label>
-        <textarea rows="2" onchange="updateFeatured(${index}, 'description', this.value)">${item.description || ''}</textarea>
-      </div>
-      <div class="form-group mb-3">
-        <label>Action URL</label>
-        <input type="text" value="${item.url || ''}" onchange="updateFeatured(${index}, 'url', this.value)">
-      </div>
-      <div class="grid-2">
-        <div class="form-group mb-3">
-          <label>Badge (e.g. Figma, New)</label>
-          <input type="text" value="${item.badge || ''}" onchange="updateFeatured(${index}, 'badge', this.value)">
-        </div>
-        <div class="form-group mb-3">
-          <label>Price / Value Tag</label>
-          <input type="text" value="${item.price || ''}" onchange="updateFeatured(${index}, 'price', this.value)">
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="form-group mb-0">
-          <label>Action Label</label>
-          <input type="text" value="${item.actionLabel || ''}" placeholder="e.g. View Project" onchange="updateFeatured(${index}, 'actionLabel', this.value)">
-        </div>
-        <div class="form-group mb-0">
-          <label>Image (Upload or Link)</label>
-          <div style="display:flex; gap:8px;">
-            <input type="text" value="${item.image || ''}" onchange="updateFeatured(${index}, 'image', this.value)" id="featured-image-url-${index}" style="flex:1">
-            <input type="file" id="featured-image-file-${index}" accept="image/*" style="display:none" onchange="handleFeaturedImageUpload(event, index)">
-            <button class="btn btn-secondary" onclick="document.getElementById('featured-image-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+      <div class="list-item-body ${item._isExpanded ? '' : 'collapsed'}">
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>Title</label>
+            <input type="text" value="${item.title || ''}" onchange="updateFeatured(${index}, 'title', this.value)">
           </div>
-          <small id="featured-image-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+          <div class="form-group mb-3">
+            <label>Subtitle / Category</label>
+            <input type="text" value="${item.subtitle || ''}" onchange="updateFeatured(${index}, 'subtitle', this.value)">
+          </div>
+        </div>
+        <div class="form-group mb-3">
+          <label>Description</label>
+          <textarea rows="2" onchange="updateFeatured(${index}, 'description', this.value)">${item.description || ''}</textarea>
+        </div>
+        <div class="form-group mb-3">
+          <label>Action URL</label>
+          <input type="text" value="${item.url || ''}" onchange="updateFeatured(${index}, 'url', this.value)">
+        </div>
+        <div class="grid-2">
+          <div class="form-group mb-3">
+            <label>Badge (e.g. Figma, New)</label>
+            <input type="text" value="${item.badge || ''}" onchange="updateFeatured(${index}, 'badge', this.value)">
+          </div>
+          <div class="form-group mb-3">
+            <label>Price / Value Tag</label>
+            <input type="text" value="${item.price || ''}" onchange="updateFeatured(${index}, 'price', this.value)">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group mb-0">
+            <label>Action Label</label>
+            <input type="text" value="${item.actionLabel || ''}" placeholder="e.g. View Project" onchange="updateFeatured(${index}, 'actionLabel', this.value)">
+          </div>
+          <div class="form-group mb-0">
+            <label>Image (Upload or Link)</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" value="${item.image || ''}" onchange="updateFeatured(${index}, 'image', this.value)" id="featured-image-url-${index}" style="flex:1">
+              <input type="file" id="featured-image-file-${index}" accept="image/*" style="display:none" onchange="handleFeaturedImageUpload(event, index)">
+              <button class="btn btn-secondary" onclick="document.getElementById('featured-image-file-${index}').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+            </div>
+            <small id="featured-image-status-${index}" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+          </div>
         </div>
       </div>
     `;
@@ -882,7 +903,7 @@ function renderFeatured() {
 window.deleteFeatured = (index) => { currentConfig.featured.splice(index, 1); renderFeatured(); };
 window.updateFeatured = (index, key, val) => { currentConfig.featured[index][key] = val; };
 document.getElementById('add-featured').addEventListener('click', () => {
-  currentConfig.featured.push({ title: 'New Featured Item', subtitle: 'Category', description: '', url: 'https://', badge: '', price: '', actionLabel: 'View Project', image: '' });
+  currentConfig.featured.push({ _isExpanded: true, title: 'New Featured Item', subtitle: 'Category', description: '', url: 'https://', badge: '', price: '', actionLabel: 'View Project', image: '' });
   renderFeatured();
 });
 
@@ -959,6 +980,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// --- Sortable & Collapse Logic ---
+window.toggleCollapse = (headerEl, type, index) => {
+  headerEl.classList.toggle('collapsed');
+  const bodyEl = headerEl.nextElementSibling;
+  const isNowCollapsed = headerEl.classList.contains('collapsed');
+  if (bodyEl) bodyEl.classList.toggle('collapsed', isNowCollapsed);
+  
+  if (currentConfig[type] && currentConfig[type][index]) {
+    currentConfig[type][index]._isExpanded = !isNowCollapsed;
+  }
+};
+
+function initSortable(containerId, arrayKey, renderFn) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  new Sortable(container, {
+    handle: '.drag-handle',
+    animation: 150,
+    onEnd: (evt) => {
+      if (evt.oldIndex === evt.newIndex) return;
+      const movedItem = currentConfig[arrayKey].splice(evt.oldIndex, 1)[0];
+      currentConfig[arrayKey].splice(evt.newIndex, 0, movedItem);
+      renderFn();
+    }
+  });
+}
+
 // Initial Render
 renderSkills();
 renderSocials();
@@ -966,3 +1014,9 @@ renderLinks();
 renderCtas();
 renderFeatured();
 renderTheme();
+
+initSortable('skills-list', 'skills', renderSkills);
+initSortable('socials-list', 'socials', renderSocials);
+initSortable('links-list', 'links', renderLinks);
+initSortable('ctas-list', 'ctas', renderCtas);
+initSortable('featured-list', 'featured', renderFeatured);

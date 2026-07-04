@@ -251,6 +251,32 @@ textarea {
   margin-bottom: 20px;
   padding-bottom: 12px;
   border-bottom: 1px dashed var(--border);
+  cursor: pointer;
+}
+
+.list-item-header.collapsed {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.list-item-body {
+  display: block;
+}
+
+.list-item-body.collapsed {
+  display: none;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .list-item-title {

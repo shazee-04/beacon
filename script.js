@@ -70,6 +70,39 @@
       border: "#111111",
       textMain: "#000000",
       textMuted: "#666666"
+    },
+    "cyberpunk-neon": {
+      primary: "#FF007F",
+      primaryHover: "#D00068",
+      secondary: "#00F0FF",
+      tertiary: "#7B2CBF",
+      bg: "#09090B",
+      cardBg: "#121217",
+      border: "#27272A",
+      textMain: "#F4F4F5",
+      textMuted: "#A1A1AA"
+    },
+    "abyss-slate": {
+      primary: "#E2E8F0",
+      primaryHover: "#FFFFFF",
+      secondary: "#94A3B8",
+      tertiary: "#475569",
+      bg: "#0F172A",
+      cardBg: "#1E293B",
+      border: "#334155",
+      textMain: "#F8FAFC",
+      textMuted: "#94A3B8"
+    },
+    "forest-shadow": {
+      primary: "#4ADE80",
+      primaryHover: "#22C55E",
+      secondary: "#10B981",
+      tertiary: "#047857",
+      bg: "#022C22",
+      cardBg: "#064E3B",
+      border: "#065F46",
+      textMain: "#ECFDF5",
+      textMuted: "#6EE7B7"
     }
   };
 
@@ -92,12 +125,6 @@
       root.style.setProperty('--border-color', colors.border);
       if (colors.textMain) root.style.setProperty('--text-main', colors.textMain);
       if (colors.textMuted) root.style.setProperty('--text-muted', colors.textMuted);
-
-      if (themeConfig.preset === 'midnight-tech') {
-        document.body.classList.add('dark-theme');
-      } else {
-        document.body.classList.remove('dark-theme');
-      }
     }
   }
 
@@ -286,8 +313,8 @@
         const showClass = link.expandedByDefault ? 'show' : '';
         const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         return `
-          <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
-            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
+          <div class="mb-3 border rounded-4 overflow-hidden link-tile-group">
+            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start" 
               type="button" 
               data-bs-toggle="collapse" 
               data-bs-target="#${collapseId}" 
@@ -303,7 +330,7 @@
               <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
             </button>
             <div class="collapse ${showClass}" id="${collapseId}">
-              <div class="px-3 pb-3 pt-2 bg-light border-top">
+              <div class="px-3 pb-3 pt-2 border-top link-tile-expanded-content">
                 <div class="embed-container ratio ratio-16x9">
                   <iframe src="${link.embedUrl}" allowfullscreen loading="lazy" style="border: 0;"></iframe>
                 </div>
@@ -319,7 +346,7 @@
         const showClass = link.expandedByDefault ? 'show' : '';
         const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         const itemsHtml = (link.expandableItems || []).map(item => `
-          <${item.url ? `a href="${item.url}" target="_blank" rel="noopener"` : 'div'} class="expandable-card-layout ${item.url ? 'is-link text-decoration-none text-dark' : ''}">
+          <${item.url ? `a href="${item.url}" target="_blank" rel="noopener"` : 'div'} class="expandable-card-layout ${item.url ? 'is-link text-decoration-none' : ''}">
             <div class="expandable-card-img-wrapper">
               <img src="${item.image || ''}" loading="lazy" alt="${item.title || 'Image'}" class="expandable-card-img shadow-sm">
             </div>
@@ -331,8 +358,8 @@
         `).join('');
 
         return `
-          <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
-            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
+          <div class="mb-3 border rounded-4 overflow-hidden link-tile-group">
+            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start" 
               type="button" 
               data-bs-toggle="collapse" 
               data-bs-target="#${collapseId}" 
@@ -348,7 +375,7 @@
               <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
             </button>
             <div class="collapse ${showClass}" id="${collapseId}">
-              <div class="px-3 pb-3 pt-3 bg-light border-top d-flex flex-column gap-3">
+              <div class="px-3 pb-3 pt-3 border-top d-flex flex-column gap-3 link-tile-expanded-content">
                 ${itemsHtml}
               </div>
             </div>
@@ -365,10 +392,10 @@
         const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         const sublinksHtml = link.sublinks.map(sub => {
           return `
-            <div class="sublink-row d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 rounded-4 bg-white border mb-2 gap-2">
+            <div class="sublink-row d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 rounded-4 border mb-2 gap-2">
               <div class="d-flex align-items-center gap-3">
                 <span class="material-symbols-outlined text-danger fs-3">picture_as_pdf</span>
-                <span class="fw-semibold text-dark fs-6 font-brand">${sub.label}</span>
+                <span class="fw-semibold fs-6 font-brand" style="color: var(--text-main);">${sub.label}</span>
               </div>
               <div class="d-flex gap-2 w-sm-auto justify-content-end">
                 <a href="${sub.driveUrl}" target="_blank" class="btn btn-sm btn-sublink-action d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
@@ -385,8 +412,8 @@
         }).join('');
 
         return `
-          <div class="mb-3 border rounded-4 bg-white overflow-hidden link-tile-group">
-            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start bg-transparent" 
+          <div class="mb-3 border rounded-4 overflow-hidden link-tile-group">
+            <button class="link-tile d-flex align-items-center gap-3 p-3 border-0 text-decoration-none w-100 text-start" 
               type="button" 
               data-bs-toggle="collapse" 
               data-bs-target="#${collapseId}" 
@@ -402,7 +429,7 @@
               <span class="material-symbols-outlined link-tile-arrow ${chevronClass}">expand_more</span>
             </button>
             <div class="collapse ${showClass}" id="${collapseId}">
-              <div class="px-3 pb-3 pt-2 bg-light border-top">
+              <div class="px-3 pb-3 pt-2 border-top link-tile-expanded-content">
                 ${sublinksHtml}
               </div>
             </div>
