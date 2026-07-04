@@ -469,16 +469,53 @@ document.getElementById('add-link').addEventListener('click', () => {
 
 
 // --- Export Configuration ---
-document.getElementById('btn-generate').addEventListener('click', () => {
-  const code = `/* ═══════════════════════════════════════════
+function generateConfigCode() {
+  const cleanConfig = JSON.parse(JSON.stringify(currentConfig, (key, value) => {
+    if (key.startsWith('_')) return undefined;
+    return value;
+  }));
+
+  const indentJSON = (obj) => {
+    if (obj === undefined) return 'undefined';
+    return JSON.stringify(obj, null, 2).split('\n').map((line, i) => i === 0 ? line : '  ' + line).join('\n');
+  };
+
+  return `/* ═══════════════════════════════════════════
    BIO LINK — Central Configuration File
    Modify this file to easily update your links,
    profile details, socials, and skills.
    ═══════════════════════════════════════════ */
 
-window.APP_CONFIG = ${JSON.stringify(currentConfig, null, 2)};
+window.APP_CONFIG = {
+  // Profile settings
+  profile: ${indentJSON(cleanConfig.profile)},
+
+  // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'custom')
+  theme: ${indentJSON(cleanConfig.theme)},
+
+  // Skill tags
+  skills: ${indentJSON(cleanConfig.skills)},
+
+  // Social media quick action links (displayed on the profile card)
+  socials: ${indentJSON(cleanConfig.socials)},
+
+  // Prominent Call-To-Action buttons
+  ctas: ${indentJSON(cleanConfig.ctas)},
+
+  // Featured Content Section Title
+  featuredTitle: ${JSON.stringify(cleanConfig.featuredTitle || 'Featured')},
+
+  // Featured Content (e.g. Products, Latest Projects)
+  featured: ${indentJSON(cleanConfig.featured)},
+
+  // Main Links (vertical list)
+  links: ${indentJSON(cleanConfig.links)}
+};
 `;
-  document.getElementById('export-code').value = code;
+}
+
+document.getElementById('btn-generate').addEventListener('click', () => {
+  document.getElementById('export-code').value = generateConfigCode();
 });
 
 document.getElementById('btn-copy').addEventListener('click', () => {
@@ -540,14 +577,7 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
   statusEl.textContent = 'Preparing configuration...';
   statusEl.style.color = 'var(--text-main)';
 
-  const code = `/* ═══════════════════════════════════════════
-   BIO LINK — Central Configuration File
-   Modify this file to easily update your links,
-   profile details, socials, and skills.
-   ═══════════════════════════════════════════ */
-
-window.APP_CONFIG = ${JSON.stringify(currentConfig, null, 2)};
-`;
+  const code = generateConfigCode();
 
   try {
     statusEl.textContent = 'Fetching current file status...';
