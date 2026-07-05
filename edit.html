@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Beacon | Config Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" href="assets/icons/beacon.png" type="image/x-icon">
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <link rel="stylesheet" href="edit.css">
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+</head>
+<body>
+  <!-- Welcome/Awareness Modal -->
+  <div id="welcome-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h2>Automate Your Setup</h2>
+      <p style="margin: 12px 0; color: var(--text-muted); line-height: 1.5;">Welcome to the Bio Link Editor! Did you know you can automate file uploads and config deployments directly to GitHub?</p>
+      <p style="margin-bottom: 24px; color: var(--text-muted); line-height: 1.5;">To enable this, head over to the <strong>Settings</strong> tab and add your GitHub Personal Access Token.</p>
+      <div class="modal-actions" style="display:flex; justify-content:flex-end; gap:12px;">
+        <button class="btn btn-secondary" id="btn-dismiss-modal">Dismiss</button>
+        <button class="btn btn-primary" id="btn-go-settings">Go to Settings</button>
+      </div>
+    </div>
+  </div>
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>Bio Link Editor</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="profile"><span class="material-symbols-outlined">person</span> Profile</button>
+        <button class="nav-btn" data-tab="theme"><span class="material-symbols-outlined">brush</span> Theme</button>
+        <button class="nav-btn" data-tab="skills"><span class="material-symbols-outlined">palette</span> Skills</button>
+        <button class="nav-btn" data-tab="socials"><span class="material-symbols-outlined">share</span> Socials</button>
+        <button class="nav-btn" data-tab="featured"><span class="material-symbols-outlined">featured_play_list</span> Featured</button>
+        <button class="nav-btn" data-tab="links"><span class="material-symbols-outlined">link</span> Links</button>
+        <button class="nav-btn" data-tab="cta-footer"><span class="material-symbols-outlined">call_to_action</span> CTA</button>
+        <button class="nav-btn" data-tab="settings"><span class="material-symbols-outlined">settings</span> Settings</button>
+        <div class="spacer"></div>
+        <button class="nav-btn export-btn" data-tab="export"><span class="material-symbols-outlined">save</span> Save & Deploy</button>
+      </nav>
+    </aside>
+
+    <!-- Top Right Editor Controls -->
+    <div class="editor-controls-topright">
+      <button class="btn-discard-pill" id="btn-discard-draft-top" style="display: none;">
+        <span class="material-symbols-outlined">delete</span> Discard Changes
+      </button>
+      <div class="draft-status-pill saved" id="draft-status-indicator">
+        <span class="material-symbols-outlined status-icon">check_circle</span>
+        <span class="status-text">Saved</span>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Draft Warning Banner -->
+      <div id="draft-warning-banner" class="draft-warning-banner" style="display: none;">
+        <span class="material-symbols-outlined warning-icon" style="color: #f4b908;">warning</span>
+        <span>You are editing an unsaved local draft. Deploy or discard changes.</span>
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="profile" class="tab-pane active">
+        <header class="pane-header">
+          <h3>Profile Settings</h3>
+          <p>Update your main identity information.</p>
+        </header>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="prof-username" placeholder="shazee">
+        </div>
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="prof-name">
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="prof-title">
+        </div>
+        <div class="form-group">
+          <label>Bio</label>
+          <textarea id="prof-bio" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Avatar (URL or Monogram)</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="prof-avatar" style="flex:1;">
+            <input type="file" id="prof-avatar-file" accept="image/*" style="display:none;">
+            <button class="btn btn-secondary" onclick="document.getElementById('prof-avatar-file').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+          </div>
+          <small id="avatar-upload-status" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+        </div>
+      </div>
+
+      <!-- Theme Tab -->
+      <div id="theme" class="tab-pane">
+        <header class="pane-header">
+          <h3>Theme Settings</h3>
+          <p>Customize the look and feel of your bio page.</p>
+        </header>
+        <div class="form-group">
+          <label>Theme Preset</label>
+          <select id="theme-preset" onchange="handleThemePresetChange(this.value)">
+            <option value="deep-indigo">Deep Indigo (Default)</option>
+            <option value="sunset-peach">Sunset Peach</option>
+            <option value="emerald-sage">Emerald Sage</option>
+            <option value="midnight-tech">Midnight Tech (Dark)</option>
+            <option value="monochrome-ink">Monochrome Ink</option>
+            <option value="cyberpunk-neon">Cyberpunk Neon</option>
+            <option value="abyss-slate">Abyss Slate</option>
+            <option value="forest-shadow">Forest Shadow</option>
+            <option value="custom">Custom Theme</option>
+          </select>
+        </div>
+        
+        <div id="custom-theme-colors" style="display: none;">
+          <h4 style="margin: 24px 0 12px 0; font-size: 1rem; font-weight: 600;">Custom Colors</h4>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Primary Brand Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-primary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('primary', this.value)">
+                <input type="text" id="theme-primary" style="flex: 1;" onchange="updateCustomColor('primary', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Primary Hover Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-primaryHover-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('primaryHover', this.value)">
+                <input type="text" id="theme-primaryHover" style="flex: 1;" onchange="updateCustomColor('primaryHover', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Secondary Accent Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-secondary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('secondary', this.value)">
+                <input type="text" id="theme-secondary" style="flex: 1;" onchange="updateCustomColor('secondary', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Tertiary Mesh Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-tertiary-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('tertiary', this.value)">
+                <input type="text" id="theme-tertiary" style="flex: 1;" onchange="updateCustomColor('tertiary', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Background Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-bg-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('bg', this.value)">
+                <input type="text" id="theme-bg" style="flex: 1;" onchange="updateCustomColor('bg', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Card Background</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-cardBg-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('cardBg', this.value)">
+                <input type="text" id="theme-cardBg" style="flex: 1;" onchange="updateCustomColor('cardBg', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Border Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-border-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('border', this.value)">
+                <input type="text" id="theme-border" style="flex: 1;" onchange="updateCustomColor('border', this.value)">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Text Main Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-textMain-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('textMain', this.value)">
+                <input type="text" id="theme-textMain" style="flex: 1;" onchange="updateCustomColor('textMain', this.value)">
+              </div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Text Muted Color</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="color" id="theme-textMuted-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;" oninput="updateCustomColor('textMuted', this.value)">
+                <input type="text" id="theme-textMuted" style="flex: 1;" onchange="updateCustomColor('textMuted', this.value)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Tab -->
+      <div id="skills" class="tab-pane">
+        <header class="pane-header">
+          <h3>Skills</h3>
+          <p>Manage the skill chips displayed under your identity.</p>
+        </header>
+        <div id="skills-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3" id="add-skill">
+          <span class="material-symbols-outlined">add</span> Add Skill
+        </button>
+      </div>
+
+      <!-- Socials Tab -->
+      <div id="socials" class="tab-pane">
+        <header class="pane-header">
+          <h3>Socials</h3>
+          <p>Quick action icons on your profile card.</p>
+        </header>
+        <div id="socials-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3" id="add-social">
+          <span class="material-symbols-outlined">add</span> Add Social
+        </button>
+      </div>
+
+      <!-- Featured Tab -->
+      <div id="featured" class="tab-pane">
+        <header class="pane-header">
+          <h3>Featured Items</h3>
+          <p>Highlight your best projects or products in a rich grid layout.</p>
+        </header>
+        <div class="form-group">
+          <label>Featured Section Title</label>
+          <input type="text" id="featured-title-input" placeholder="e.g. Featured Projects">
+        </div>
+        <div id="featured-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3" id="add-featured">
+          <span class="material-symbols-outlined">add</span> Add Featured Item
+        </button>
+      </div>
+
+      <!-- Links Tab -->
+      <div id="links" class="tab-pane">
+        <header class="pane-header">
+          <h3>Primary Links</h3>
+          <p>Your main vertical links and sublinks.</p>
+        </header>
+        <div id="links-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3" id="add-link">
+          <span class="material-symbols-outlined">add</span> Add Link
+        </button>
+      </div>
+
+      <!-- CTA & Footer Tab -->
+      <div id="cta-footer" class="tab-pane">
+        <header class="pane-header">
+          <h3>CTA Buttons</h3>
+          <p>Manage the Call-To-Action buttons on your profile card.</p>
+        </header>
+        <div id="ctas-list" class="list-container"></div>
+        <button class="btn btn-secondary mt-3 mb-5" id="add-cta">
+          <span class="material-symbols-outlined">add</span> Add CTA Button
+        </button>
+      </div>
+
+      <!-- Export Tab -->
+      <div id="export" class="tab-pane">
+        <header class="pane-header">
+          <h3>Deploy Configuration</h3>
+          <p>Deploy directly to GitHub, or generate the code to copy manually.</p>
+        </header>
+        
+        <div class="export-actions mb-3 mt-4">
+          <button class="btn btn-primary" id="btn-deploy" style="background-color: #2da44e; color: #fff;">
+            <span class="material-symbols-outlined">cloud_upload</span> Deploy to GitHub
+          </button>
+        </div>
+        <div id="deploy-status" style="margin-top: 12px; margin-bottom: 32px; font-size: 0.9rem; font-weight: 500;"></div>
+
+        <header class="pane-header" style="border-top: 1px solid var(--border); padding-top: 32px;">
+          <h3>Manual Export</h3>
+          <p>Copy this code and replace the contents of your <code>config.js</code> file.</p>
+        </header>
+        <div class="export-actions mb-3">
+          <button class="btn btn-primary" id="btn-generate">
+            <span class="material-symbols-outlined">sync</span> Generate Code
+          </button>
+          <button class="btn btn-secondary" id="btn-copy">
+            <span class="material-symbols-outlined">content_copy</span> Copy to Clipboard
+          </button>
+        </div>
+        <textarea id="export-code" class="code-area" readonly placeholder="Your generated config will appear here..."></textarea>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="settings" class="tab-pane">
+        <header class="pane-header">
+          <h3>GitHub Integration</h3>
+          <p>Automate your deployments and file uploads directly to your GitHub repository.</p>
+        </header>
+        <div class="form-group">
+          <label>GitHub Username</label>
+          <div style="position:relative;">
+            <input type="text" id="gh-username" placeholder="e.g. shazee-04">
+            <span id="saved-bioLinkGhUsername" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Repository Name</label>
+          <div style="position:relative;">
+            <input type="text" id="gh-repo" placeholder="e.g. bio-link">
+            <span id="saved-bioLinkGhRepo" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Personal Access Token <a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank" style="font-size: 0.8rem; text-decoration: underline; color: blue;">(create one)</a></label>
+          <div style="position:relative;">
+            <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx" style="width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 0.9rem; background: var(--surface); color: var(--text-main);">
+            <span id="saved-bioLinkGhToken" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); font-size:0.75rem; font-weight:600; opacity:0; transition:opacity 0.3s; pointer-events:none; color: var(--text-muted);">Saved</span>
+          </div>
+          <small style="display:block; margin-top: 4px; color: var(--text-muted); font-size: 0.8rem;">Your token is saved securely in your browser's local storage and is never sent to any third-party server.</small>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  
+  <script src="edit.js"></script>
+</body>
+</html>
