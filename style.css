@@ -806,3 +806,121 @@ h6,
 .link-tile[aria-expanded="false"] .toggle-chevron-expanded {
   transform: rotate(0deg);
 }
+
+/* --- Promo Centered Modal Popup --- */
+.promo-popup-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-medium) var(--ease-emphasized);
+  padding: 24px;
+}
+
+.promo-popup-wrapper.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.promo-popup {
+  width: 340px;
+  max-width: 100%;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+  transform: scale(0.9) translateY(20px);
+  transition: transform var(--duration-medium) var(--ease-emphasized);
+}
+
+.promo-popup-wrapper.show .promo-popup {
+  transform: scale(1) translateY(0);
+}
+
+.promo-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.promo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.promo-icon {
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+.promo-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+}
+
+.promo-close-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.promo-close-btn:hover {
+  background-color: color-mix(in srgb, var(--text-main) 8%, transparent);
+  color: var(--text-main);
+}
+
+.promo-title {
+  font-family: var(--font-brand);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(135deg, #FF007A, #7B00FF, #00F0FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.promo-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.btn-promo {
+  background-color: var(--primary-color);
+  color: #FFFFFF !important;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border: none;
+  background:  linear-gradient(135deg, var(--primary-color), var(--tertiary-color));
+  transition: all 0.2s ease;
+}
+
+.btn-promo:hover {
+  /* background-color: var(--primary-hover); */
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}

@@ -539,4 +539,36 @@
       el.style.animationPlayState = 'running';
     });
   }
+
+  // --- 4. Promo Popup Trigger (3 seconds after page load) ---
+  setTimeout(() => {
+    const promoWrapper = document.getElementById('promo-popup-wrapper');
+    const promoClose = document.getElementById('promo-close');
+    
+    if (promoWrapper) {
+      promoWrapper.classList.add('show');
+      promoWrapper.setAttribute('aria-hidden', 'false');
+      
+      const dismissPopup = () => {
+        promoWrapper.classList.remove('show');
+        promoWrapper.setAttribute('aria-hidden', 'true');
+      };
+      
+      if (promoClose) {
+        promoClose.addEventListener('click', dismissPopup);
+      }
+      
+      const promoCta = promoWrapper.querySelector('.btn-promo');
+      if (promoCta) {
+        promoCta.addEventListener('click', dismissPopup);
+      }
+
+      // Close when clicking the backdrop overlay
+      promoWrapper.addEventListener('click', (e) => {
+        if (e.target === promoWrapper) {
+          dismissPopup();
+        }
+      });
+    }
+  }, 3000);
 })();
