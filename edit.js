@@ -1166,14 +1166,10 @@ setInterval(() => {
         `;
       }
 
-      // 4. Reveal the Discard button and Warning Banner since we now have unsaved local changes
+      // 4. Reveal the Discard button since we now have unsaved local changes
       const discardBtn = document.getElementById('btn-discard-draft-top');
       if (discardBtn) {
         discardBtn.style.display = 'flex';
-      }
-      const warningBanner = document.getElementById('draft-warning-banner');
-      if (warningBanner) {
-        warningBanner.style.display = 'flex';
       }
     }, 600);
   }
