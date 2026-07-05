@@ -1122,6 +1122,22 @@ initSortable('links-list', 'links', renderLinks);
 initSortable('ctas-list', 'ctas', renderCtas);
 initSortable('featured-list', 'featured', renderFeatured);
 
+// --- Live Preview Polling Loop ---
+let lastPreviewStr = JSON.stringify(currentConfig);
+setInterval(() => {
+  const currentStr = JSON.stringify(currentConfig);
+  if (currentStr !== lastPreviewStr) {
+    lastPreviewStr = currentStr;
+    const iframe = document.getElementById('preview-iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({
+        type: 'UPDATE_CONFIG',
+        config: JSON.parse(currentStr)
+      }, '*');
+    }
+  }
+}, 300);
+
 // --- Auto-Save Polling Loop ---
 setInterval(() => {
   const currentStr = JSON.stringify(currentConfig);

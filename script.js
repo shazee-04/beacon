@@ -8,11 +8,16 @@
   'use strict';
 
   // --- 1. Populate Content from Configuration ---
-  const config = window.APP_CONFIG;
-  if (!config) {
-    console.error('Configuration data (config.js) not found.');
-    return;
-  }
+  function renderPage(config) {
+    if (!config) {
+      console.error('Configuration data (config.js) not found.');
+      return;
+    }
+
+    // Check if the page is loaded inside an iframe (preview mode)
+    if (window !== window.parent) {
+      document.documentElement.classList.add('in-preview');
+    }
 
   // --- Theme Presets & Loading ---
   const THEME_PRESETS = {
@@ -482,6 +487,49 @@
     `;
   }
 
+  initScrollAnimations();
+  }
+
+  let scrollObserver = null;
+  function initScrollAnimations() {
+    if ('IntersectionObserver' in window) {
+      if (scrollObserver) scrollObserver.disconnect();
+      scrollObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.style.animationPlayState = 'running';
+              scrollObserver.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: '0px 0px -40px 0px',
+          threshold: 0.05,
+        }
+      );
+
+      const animatedElements = document.querySelectorAll('.link-tile, .footer');
+      animatedElements.forEach((el) => scrollObserver.observe(el));
+    } else {
+      const animatedElements = document.querySelectorAll('.link-tile, .footer');
+      animatedElements.forEach((el) => {
+        el.style.animationPlayState = 'running';
+      });
+    }
+  }
+
+  // Initial Load
+  renderPage(window.APP_CONFIG);
+
+  // Live Preview Support
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'UPDATE_CONFIG') {
+      window.APP_CONFIG = event.data.config;
+      renderPage(window.APP_CONFIG);
+    }
+  });
 
   // --- 2. Ambient Background Cursor Parallax ---
   const blobs = document.querySelectorAll('.blob');
@@ -513,62 +561,38 @@
     animateBackground();
   }
 
-  // --- 3. Staggered Scroll-Entrance Animation ---
-  if ('IntersectionObserver' in window) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.style.animationPlayState = 'running';
-            observer.unobserve(entry.target);
+  // (Scroll animations are now initialized inside renderPage)
+  // --- 4. Promo Popup Trigger (3 seconds after page load) ---
+  if (window === window.parent) {
+    setTimeout(() => {
+      const promoWrapper = document.getElementById('promo-popup-wrapper');
+      const promoClose = document.getElementById('promo-close');
+      
+      if (promoWrapper) {
+        promoWrapper.classList.add('show');
+        promoWrapper.setAttribute('aria-hidden', 'false');
+        
+        const dismissPopup = () => {
+          promoWrapper.classList.remove('show');
+          promoWrapper.setAttribute('aria-hidden', 'true');
+        };
+        
+        if (promoClose) {
+          promoClose.addEventListener('click', dismissPopup);
+        }
+        
+        const promoCta = promoWrapper.querySelector('.btn-promo');
+        if (promoCta) {
+          promoCta.addEventListener('click', dismissPopup);
+        }
+
+        // Close when clicking the backdrop overlay
+        promoWrapper.addEventListener('click', (e) => {
+          if (e.target === promoWrapper) {
+            dismissPopup();
           }
         });
-      },
-      {
-        root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.05,
       }
-    );
-
-    const animatedElements = document.querySelectorAll('.link-tile, .footer');
-    animatedElements.forEach((el) => observer.observe(el));
-  } else {
-    const animatedElements = document.querySelectorAll('.link-tile, .footer');
-    animatedElements.forEach((el) => {
-      el.style.animationPlayState = 'running';
-    });
+    }, 3000);
   }
-
-  // --- 4. Promo Popup Trigger (3 seconds after page load) ---
-  setTimeout(() => {
-    const promoWrapper = document.getElementById('promo-popup-wrapper');
-    const promoClose = document.getElementById('promo-close');
-    
-    if (promoWrapper) {
-      promoWrapper.classList.add('show');
-      promoWrapper.setAttribute('aria-hidden', 'false');
-      
-      const dismissPopup = () => {
-        promoWrapper.classList.remove('show');
-        promoWrapper.setAttribute('aria-hidden', 'true');
-      };
-      
-      if (promoClose) {
-        promoClose.addEventListener('click', dismissPopup);
-      }
-      
-      const promoCta = promoWrapper.querySelector('.btn-promo');
-      if (promoCta) {
-        promoCta.addEventListener('click', dismissPopup);
-      }
-
-      // Close when clicking the backdrop overlay
-      promoWrapper.addEventListener('click', (e) => {
-        if (e.target === promoWrapper) {
-          dismissPopup();
-        }
-      });
-    }
-  }, 3000);
 })();

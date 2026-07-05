@@ -50,17 +50,6 @@
       </nav>
     </aside>
 
-    <!-- Top Right Editor Controls -->
-    <div class="editor-controls-topright">
-      <button class="btn-discard-pill" id="btn-discard-draft-top" style="display: none;">
-        <span class="material-symbols-outlined">delete</span> Discard Changes
-      </button>
-      <div class="draft-status-pill saved" id="draft-status-indicator">
-        <span class="material-symbols-outlined status-icon">check_circle</span>
-        <span class="status-text">Saved</span>
-      </div>
-    </div>
-
     <!-- Main Content Area -->
     <main class="main-content">
       
@@ -68,6 +57,17 @@
       <div id="draft-warning-banner" class="draft-warning-banner" style="display: none;">
         <span class="material-symbols-outlined warning-icon" style="color: #f4b908;">warning</span>
         <span>You are editing an unsaved local draft. Deploy or discard changes.</span>
+      </div>
+
+      <!-- Top Right Editor Controls -->
+      <div class="editor-controls-topright">
+        <button class="btn-discard-pill" id="btn-discard-draft-top" style="display: none;">
+          <span class="material-symbols-outlined">delete</span> Discard Changes
+        </button>
+        <div class="draft-status-pill saved" id="draft-status-indicator">
+          <span class="material-symbols-outlined status-icon">check_circle</span>
+          <span class="status-text">Saved</span>
+        </div>
       </div>
 
       <!-- Profile Tab -->
@@ -326,6 +326,14 @@
       </div>
 
     </main>
+
+    <!-- Preview Panel -->
+    <div class="preview-panel">
+      <div class="phone-simulator">
+        <iframe id="preview-iframe" src="index.html"></iframe>
+      </div>
+    </div>
+
   </div>
   
   <script src="edit.js"></script>
