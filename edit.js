@@ -1,7 +1,26 @@
-// Initialize with current config or a default empty structure
-let currentConfig = window.APP_CONFIG ? JSON.parse(JSON.stringify(window.APP_CONFIG)) : {
-  profile: {}, skills: [], cta: {}, socials: [], links: [], footer: {}
-};
+// --- Draft Initialization ---
+const DRAFT_KEY = 'bioLinkConfigDraft';
+let savedDraft = localStorage.getItem(DRAFT_KEY);
+let currentConfig;
+let hasDraft = false;
+
+if (savedDraft) {
+  try {
+    currentConfig = JSON.parse(savedDraft);
+    hasDraft = true;
+  } catch (e) {
+    console.error("Failed to parse draft:", e);
+    currentConfig = window.APP_CONFIG ? JSON.parse(JSON.stringify(window.APP_CONFIG)) : {
+      profile: {}, skills: [], cta: {}, socials: [], links: [], footer: {}
+    };
+  }
+} else {
+  currentConfig = window.APP_CONFIG ? JSON.parse(JSON.stringify(window.APP_CONFIG)) : {
+    profile: {}, skills: [], cta: {}, socials: [], links: [], footer: {}
+  };
+}
+
+let lastSavedStr = JSON.stringify(currentConfig);
 
 // Ensure new structure elements exist
 if (!currentConfig.theme) currentConfig.theme = { preset: 'deep-indigo' };
@@ -636,6 +655,25 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
     if (putRes.ok) {
       statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
       statusEl.style.color = '#388e3c'; // Green
+      
+      // Clear draft after successful deploy
+      localStorage.removeItem(DRAFT_KEY);
+      lastSavedStr = JSON.stringify(currentConfig);
+      
+      const discardBtn = document.getElementById('btn-discard-draft-top');
+      if (discardBtn) discardBtn.style.display = 'none';
+
+      const warningBanner = document.getElementById('draft-warning-banner');
+      if (warningBanner) warningBanner.style.display = 'none';
+      
+      const statusIndicator = document.getElementById('draft-status-indicator');
+      if (statusIndicator) {
+        statusIndicator.className = 'draft-status-pill saved';
+        statusIndicator.innerHTML = `
+          <span class="material-symbols-outlined status-icon">check_circle</span>
+          <span class="status-text">Saved</span>
+        `;
+      }
     } else {
       const errorData = await putRes.json();
       throw new Error(errorData.message || 'Failed to update file.');
@@ -1010,6 +1048,22 @@ window.updateCustomColor = (key, val) => {
 
 // --- Modal Logic ---
 document.addEventListener('DOMContentLoaded', () => {
+  // Show Draft Discard Button and Warning Banner if applicable
+  if (hasDraft) {
+    const discardBtn = document.getElementById('btn-discard-draft-top');
+    if (discardBtn) discardBtn.style.display = 'flex';
+
+    const warningBanner = document.getElementById('draft-warning-banner');
+    if (warningBanner) warningBanner.style.display = 'flex';
+  }
+
+  document.getElementById('btn-discard-draft-top')?.addEventListener('click', () => {
+    if (confirm("Are you sure you want to discard your draft? All unsaved changes will be lost.")) {
+      localStorage.removeItem(DRAFT_KEY);
+      window.location.reload();
+    }
+  });
+
   const modal = document.getElementById('welcome-modal');
   const hasToken = localStorage.getItem('bioLinkGhToken');
 
@@ -1067,3 +1121,52 @@ initSortable('socials-list', 'socials', renderSocials);
 initSortable('links-list', 'links', renderLinks);
 initSortable('ctas-list', 'ctas', renderCtas);
 initSortable('featured-list', 'featured', renderFeatured);
+
+// --- Auto-Save Polling Loop ---
+setInterval(() => {
+  const currentStr = JSON.stringify(currentConfig);
+  if (currentStr !== lastSavedStr) {
+    // 1. Show Saving... loading spinner state
+    const statusIndicator = document.getElementById('draft-status-indicator');
+    if (statusIndicator) {
+      statusIndicator.className = 'draft-status-pill saving';
+      statusIndicator.innerHTML = `
+        <span class="material-symbols-outlined status-icon spin">sync</span>
+        <span class="status-text">Saved</span>
+      `;
+    }
+
+    // 2. Perform local save (with small visual delay to show the transition clearly)
+    setTimeout(() => {
+      localStorage.setItem(DRAFT_KEY, currentStr);
+      lastSavedStr = currentStr;
+
+      // 3. Reset back to Saved tick state
+      if (statusIndicator) {
+        statusIndicator.className = 'draft-status-pill saved';
+        statusIndicator.innerHTML = `
+          <span class="material-symbols-outlined status-icon">check_circle</span>
+          <span class="status-text">Saved</span>
+        `;
+      }
+
+      // 4. Reveal the Discard button and Warning Banner since we now have unsaved local changes
+      const discardBtn = document.getElementById('btn-discard-draft-top');
+      if (discardBtn) {
+        discardBtn.style.display = 'flex';
+      }
+      const warningBanner = document.getElementById('draft-warning-banner');
+      if (warningBanner) {
+        warningBanner.style.display = 'flex';
+      }
+    }, 600);
+  }
+}, 2000);
+
+// --- Prevent Accidental Refresh / Page Close when Draft exists ---
+window.addEventListener('beforeunload', (e) => {
+  if (localStorage.getItem(DRAFT_KEY)) {
+    e.preventDefault();
+    e.returnValue = ''; // Required for some browsers
+  }
+});
