@@ -45,6 +45,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Hide scrollbar for iframe preview */
+html.in-preview::-webkit-scrollbar,
+html.in-preview body::-webkit-scrollbar {
+  display: none;
+}
+html.in-preview, 
+html.in-preview body {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
 .text-muted, .text-secondary {
   color: var(--text-muted) !important;
 }
