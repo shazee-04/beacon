@@ -1164,9 +1164,9 @@ setInterval(() => {
 }, 2000);
 
 // --- Prevent Accidental Refresh / Page Close when Draft exists ---
-window.addEventListener('beforeunload', (e) => {
-  if (localStorage.getItem(DRAFT_KEY)) {
-    e.preventDefault();
-    e.returnValue = ''; // Required for some browsers
-  }
-});
+// window.addEventListener('beforeunload', (e) => {
+//   if (localStorage.getItem(DRAFT_KEY)) {
+//     e.preventDefault();
+//     e.returnValue = ''; // Required for some browsers
+//   }
+// });
