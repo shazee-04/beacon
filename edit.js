@@ -75,7 +75,7 @@ if (currentConfig.profile && currentConfig.profile.avatar) {
     link.rel = 'icon';
     document.head.appendChild(link);
   }
-  
+
   if (currentConfig.profile.avatar.length === 1) {
     link.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dominant-baseline="central">${currentConfig.profile.avatar}</text></svg>`;
   } else {
@@ -266,6 +266,7 @@ function renderLinks() {
     else if (link.embedUrl) linkType = 'embed';
     else if (link.isBanner) linkType = 'banner';
     else if (link.isExpandableCard) linkType = 'expandableCard';
+    else if (link.isCustomCode) linkType = 'customCode';
 
     // Build specific options based on type
     let typeConfigHtml = '';
@@ -274,17 +275,64 @@ function renderLinks() {
         <div class="sublinks-container">
           <h6>Sublinks / Collapsible Files</h6>
           ${(link.sublinks || []).map((sub, sidx) => `
-            <div class="sublink-item" style="flex-wrap: wrap;">
-              <input type="text" placeholder="Label" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)" style="flex:1; min-width: 120px;">
-              <input type="text" placeholder="Drive URL" value="${sub.driveUrl || ''}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'driveUrl', this.value)" style="flex:1; min-width: 120px;">
-              <input type="text" placeholder="Download URL" value="${sub.downloadUrl || ''}" id="dl-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'downloadUrl', this.value)" style="flex:1; min-width: 120px;">
+            <div class="sublink-item list-item-body" style="display: block; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h6 style="margin: 0; font-size: 0.95rem; color: var(--text-main);">Sublink ${sidx + 1}</h6>
+                <button class="btn-icon delete" onclick="deleteSublink(${index}, ${sidx})" title="Delete Sublink"><span class="material-symbols-outlined">delete</span></button>
+              </div>
               
-              <input type="file" id="sublink-file-${index}-${sidx}" style="display:none" onchange="handleSublinkFileUpload(event, ${index}, ${sidx})">
-              <button class="btn-icon" onclick="document.getElementById('sublink-file-${index}-${sidx}').click()" title="Upload File to GitHub"><span class="material-symbols-outlined">upload_file</span></button>
-              
-              <button class="btn-icon delete" onclick="deleteSublink(${index}, ${sidx})" title="Delete Sublink"><span class="material-symbols-outlined">delete</span></button>
+              <div class="grid-2">
+                <div class="form-group mb-3">
+                  <label>Title</label>
+                  <input type="text" placeholder="e.g. Resume" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)">
+                </div>
+                <div class="form-group mb-3">
+                  <label>Main Icon (Material Symbol)</label>
+                  <input type="text" placeholder="e.g. picture_as_pdf" value="${sub.icon || 'picture_as_pdf'}" onchange="updateSublink(${index}, ${sidx}, 'icon', this.value)">
+                </div>
+              </div>
+
+              <div class="sublink-btn-config" style="background: var(--card-bg); margin-bottom: 32px; margin-top: 16px;">
+                <label style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: block; color: var(--text-main);">Button 1 (Optional)</label>
+                <div class="grid-2">
+                  <div class="form-group mb-3">
+                    <label>Label</label>
+                    <input type="text" placeholder="e.g. View" value="${sub.btn1Label || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn1Label', this.value)">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label>Icon</label>
+                    <input type="text" placeholder="e.g. visibility" value="${sub.btn1Icon || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn1Icon', this.value)">
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label>URL</label>
+                  <input type="text" placeholder="https://" value="${sub.btn1Url !== undefined ? sub.btn1Url : (sub.driveUrl || '')}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'btn1Url', this.value)">
+                </div>
+              </div>
+
+              <div class="sublink-btn-config" style="background: var(--card-bg);">
+                <label style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: block; color: var(--text-main);">Button 2 (Primary)</label>
+                <div class="grid-2">
+                  <div class="form-group mb-3">
+                    <label>Label</label>
+                    <input type="text" placeholder="e.g. Download" value="${sub.btn2Label || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn2Label', this.value)">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label>Icon</label>
+                    <input type="text" placeholder="e.g. download" value="${sub.btn2Icon || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn2Icon', this.value)">
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label>URL or Upload File</label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" placeholder="https:// or assets/..." value="${sub.btn2Url !== undefined ? sub.btn2Url : (sub.downloadUrl || '')}" id="dl-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'btn2Url', this.value)" style="flex:1;">
+                    <input type="file" id="sublink-file-${index}-${sidx}" style="display:none" onchange="handleSublinkFileUpload(event, ${index}, ${sidx})">
+                    <button class="btn btn-secondary" onclick="document.getElementById('sublink-file-${index}-${sidx}').click()" title="Upload File to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+                  </div>
+                </div>
+              </div>
+              <small id="sublink-status-${index}-${sidx}" style="color:var(--primary); font-weight:500; display: block; margin-top: 8px;"></small>
             </div>
-            <small id="sublink-status-${index}-${sidx}" style="display:block; margin-bottom:12px; color:var(--primary); font-weight:500;"></small>
           `).join('')}
           <button class="btn btn-secondary btn-sm mt-2" onclick="addSublink(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Sublink</button>
           <div class="form-group mt-3" style="display:flex; align-items:center; gap:8px;">
@@ -347,6 +395,16 @@ function renderLinks() {
           </div>
         </div>
       `;
+    } else if (linkType === 'customCode') {
+      typeConfigHtml = `
+        <div class="form-group mb-3">
+          <label>Custom Code (HTML/CSS/JS)</label>
+          <textarea style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; font-size: 13px; height: 180px; resize: vertical;" placeholder="<style>...</style>\n<div>...</div>\n<script>...</script>" onchange="updateLink(${index}, 'customCode', this.value)">${link.customCode || ''}</textarea>
+          <small style="color: var(--text-muted); font-size: 0.8rem; display:block; margin-top:6px; line-height: 1.4;">
+            💡 <strong>Developer Tip:</strong> Scope your CSS to avoid global leaks. Use unique class names (e.g. <code>.my-custom-card</code>) instead of generic selectors (like <code>div</code> or <code>p</code>) so you don't affect other elements on the page.
+          </small>
+        </div>
+      `;
     } else {
       typeConfigHtml = `
         <div class="form-group mb-3">
@@ -378,6 +436,7 @@ function renderLinks() {
               <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
               <option value="expandableCard" ${linkType === 'expandableCard' ? 'selected' : ''}>Expandable Image Card</option>
               <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
+              <option value="customCode" ${linkType === 'customCode' ? 'selected' : ''}>Custom Code Component</option>
             </select>
           </div>
           <div class="form-group mb-3">
@@ -461,6 +520,9 @@ window.changeLinkType = (index, type) => {
     link.expandedByDefault = false;
     link.expandableItems = [];
     link.url = 'https://';
+  } else if (type === 'customCode') {
+    link.isCustomCode = true;
+    link.customCode = '<!-- Your code here -->';
   } else {
     link.url = 'https://';
   }
@@ -468,7 +530,7 @@ window.changeLinkType = (index, type) => {
 };
 
 window.addSublink = (index) => {
-  currentConfig.links[index].sublinks.push({ label: 'New Sublink', driveUrl: '', downloadUrl: '' });
+  currentConfig.links[index].sublinks.push({ label: 'New Sublink', icon: 'picture_as_pdf', btn1Label: 'Drive', btn1Icon: 'cloud', btn1Url: '', btn2Label: 'Download', btn2Icon: 'download', btn2Url: '' });
   renderLinks();
 };
 window.updateSublink = (lIdx, sIdx, key, val) => {
@@ -655,17 +717,17 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
     if (putRes.ok) {
       statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
       statusEl.style.color = '#388e3c'; // Green
-      
+
       // Clear draft after successful deploy
       localStorage.removeItem(DRAFT_KEY);
       lastSavedStr = JSON.stringify(currentConfig);
-      
+
       const discardBtn = document.getElementById('btn-discard-draft-top');
       if (discardBtn) discardBtn.style.display = 'none';
 
       const warningBanner = document.getElementById('draft-warning-banner');
       if (warningBanner) warningBanner.style.display = 'none';
-      
+
       const statusIndicator = document.getElementById('draft-status-indicator');
       if (statusIndicator) {
         statusIndicator.className = 'draft-status-pill saved';
@@ -782,7 +844,7 @@ window.handleSublinkFileUpload = async (event, lIdx, sIdx) => {
   try {
     const path = `assets/${file.name.replace(/\\s+/g, '-')}`;
     await uploadFileToGitHub(file, path);
-    currentConfig.links[lIdx].sublinks[sIdx].downloadUrl = path;
+    currentConfig.links[lIdx].sublinks[sIdx].btn2Url = path;
     document.getElementById(`dl-${lIdx}-${sIdx}`).value = path;
     statusEl.textContent = 'Upload successful!';
     setTimeout(() => statusEl.textContent = '', 3000);
@@ -1087,7 +1149,7 @@ window.toggleCollapse = (headerEl, type, index) => {
   const bodyEl = headerEl.nextElementSibling;
   const isNowCollapsed = headerEl.classList.contains('collapsed');
   if (bodyEl) bodyEl.classList.toggle('collapsed', isNowCollapsed);
-  
+
   if (currentConfig[type] && currentConfig[type][index]) {
     currentConfig[type][index]._isExpanded = !isNowCollapsed;
   }
