@@ -415,21 +415,39 @@
         const showClass = link.expandedByDefault ? 'show' : '';
         const chevronClass = link.expandedByDefault ? 'toggle-chevron-expanded' : 'toggle-chevron';
         const sublinksHtml = link.sublinks.map(sub => {
+          const mainIcon = sub.icon || 'picture_as_pdf';
+          const btn1Url = sub.btn1Url !== undefined ? sub.btn1Url : sub.driveUrl;
+          const btn2Url = sub.btn2Url !== undefined ? sub.btn2Url : sub.downloadUrl;
+          
+          let btn1Html = '';
+          if (btn1Url) {
+            btn1Html = `
+              <a href="${btn1Url}" target="_blank" class="btn btn-sm btn-sublink-action d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
+                <span class="material-symbols-outlined fs-6">${sub.btn1Icon || 'cloud'}</span>
+                ${sub.btn1Label || 'Drive'}
+              </a>
+            `;
+          }
+          
+          let btn2Html = '';
+          if (btn2Url) {
+            btn2Html = `
+              <a href="${btn2Url}" download class="btn btn-sm btn-sublink-primary d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
+                <span class="material-symbols-outlined fs-6">${sub.btn2Icon || 'download'}</span>
+                ${sub.btn2Label || 'Download'}
+              </a>
+            `;
+          }
+
           return `
             <div class="sublink-row d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between p-3 rounded-4 border mb-2 gap-2">
               <div class="d-flex align-items-center gap-3">
-                <span class="material-symbols-outlined text-danger fs-3">picture_as_pdf</span>
+                <span class="material-symbols-outlined text-primary fs-3">${mainIcon}</span>
                 <span class="fw-semibold fs-6 font-brand" style="color: var(--text-main);">${sub.label}</span>
               </div>
               <div class="d-flex gap-2 w-sm-auto justify-content-end">
-                <a href="${sub.driveUrl}" target="_blank" class="btn btn-sm btn-sublink-action d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
-                  <span class="material-symbols-outlined fs-6">cloud</span>
-                  Drive
-                </a>
-                <a href="${sub.downloadUrl}" download class="btn btn-sm btn-sublink-primary d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
-                  <span class="material-symbols-outlined fs-6">download</span>
-                  Download
-                </a>
+                ${btn1Html}
+                ${btn2Html}
               </div>
             </div>
           `;

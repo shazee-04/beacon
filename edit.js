@@ -274,17 +274,64 @@ function renderLinks() {
         <div class="sublinks-container">
           <h6>Sublinks / Collapsible Files</h6>
           ${(link.sublinks || []).map((sub, sidx) => `
-            <div class="sublink-item" style="flex-wrap: wrap;">
-              <input type="text" placeholder="Label" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)" style="flex:1; min-width: 120px;">
-              <input type="text" placeholder="Drive URL" value="${sub.driveUrl || ''}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'driveUrl', this.value)" style="flex:1; min-width: 120px;">
-              <input type="text" placeholder="Download URL" value="${sub.downloadUrl || ''}" id="dl-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'downloadUrl', this.value)" style="flex:1; min-width: 120px;">
+            <div class="sublink-item list-item-body" style="display: block; border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-bottom: 12px; background: rgba(0,0,0,0.02);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h6 style="margin: 0; font-size: 0.95rem; color: var(--text-main);">Sublink ${sidx + 1}</h6>
+                <button class="btn-icon delete" onclick="deleteSublink(${index}, ${sidx})" title="Delete Sublink"><span class="material-symbols-outlined">delete</span></button>
+              </div>
               
-              <input type="file" id="sublink-file-${index}-${sidx}" style="display:none" onchange="handleSublinkFileUpload(event, ${index}, ${sidx})">
-              <button class="btn-icon" onclick="document.getElementById('sublink-file-${index}-${sidx}').click()" title="Upload File to GitHub"><span class="material-symbols-outlined">upload_file</span></button>
-              
-              <button class="btn-icon delete" onclick="deleteSublink(${index}, ${sidx})" title="Delete Sublink"><span class="material-symbols-outlined">delete</span></button>
+              <div class="grid-2">
+                <div class="form-group mb-3">
+                  <label>Title</label>
+                  <input type="text" placeholder="e.g. Resume" value="${sub.label}" onchange="updateSublink(${index}, ${sidx}, 'label', this.value)">
+                </div>
+                <div class="form-group mb-3">
+                  <label>Main Icon (Material Symbol)</label>
+                  <input type="text" placeholder="e.g. picture_as_pdf" value="${sub.icon || 'picture_as_pdf'}" onchange="updateSublink(${index}, ${sidx}, 'icon', this.value)">
+                </div>
+              </div>
+
+              <div class="sublink-btn-config" style="background: var(--card-bg); margin-bottom: 32px; margin-top: 16px;">
+                <label style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: block; color: var(--text-main);">Button 1 (Optional)</label>
+                <div class="grid-2">
+                  <div class="form-group mb-3">
+                    <label>Label</label>
+                    <input type="text" placeholder="e.g. View" value="${sub.btn1Label || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn1Label', this.value)">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label>Icon</label>
+                    <input type="text" placeholder="e.g. visibility" value="${sub.btn1Icon || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn1Icon', this.value)">
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label>URL</label>
+                  <input type="text" placeholder="https://" value="${sub.btn1Url !== undefined ? sub.btn1Url : (sub.driveUrl || '')}" id="drive-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'btn1Url', this.value)">
+                </div>
+              </div>
+
+              <div class="sublink-btn-config" style="background: var(--card-bg);">
+                <label style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: block; color: var(--text-main);">Button 2 (Primary)</label>
+                <div class="grid-2">
+                  <div class="form-group mb-3">
+                    <label>Label</label>
+                    <input type="text" placeholder="e.g. Download" value="${sub.btn2Label || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn2Label', this.value)">
+                  </div>
+                  <div class="form-group mb-3">
+                    <label>Icon</label>
+                    <input type="text" placeholder="e.g. download" value="${sub.btn2Icon || ''}" onchange="updateSublink(${index}, ${sidx}, 'btn2Icon', this.value)">
+                  </div>
+                </div>
+                <div class="form-group mb-0">
+                  <label>URL or Upload File</label>
+                  <div style="display:flex; gap:8px;">
+                    <input type="text" placeholder="https:// or assets/..." value="${sub.btn2Url !== undefined ? sub.btn2Url : (sub.downloadUrl || '')}" id="dl-${index}-${sidx}" onchange="updateSublink(${index}, ${sidx}, 'btn2Url', this.value)" style="flex:1;">
+                    <input type="file" id="sublink-file-${index}-${sidx}" style="display:none" onchange="handleSublinkFileUpload(event, ${index}, ${sidx})">
+                    <button class="btn btn-secondary" onclick="document.getElementById('sublink-file-${index}-${sidx}').click()" title="Upload File to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
+                  </div>
+                </div>
+              </div>
+              <small id="sublink-status-${index}-${sidx}" style="color:var(--primary); font-weight:500; display: block; margin-top: 8px;"></small>
             </div>
-            <small id="sublink-status-${index}-${sidx}" style="display:block; margin-bottom:12px; color:var(--primary); font-weight:500;"></small>
           `).join('')}
           <button class="btn btn-secondary btn-sm mt-2" onclick="addSublink(${index})"><span class="material-symbols-outlined" style="font-size:16px;">add</span> Add Sublink</button>
           <div class="form-group mt-3" style="display:flex; align-items:center; gap:8px;">
@@ -468,7 +515,7 @@ window.changeLinkType = (index, type) => {
 };
 
 window.addSublink = (index) => {
-  currentConfig.links[index].sublinks.push({ label: 'New Sublink', driveUrl: '', downloadUrl: '' });
+  currentConfig.links[index].sublinks.push({ label: 'New Sublink', icon: 'picture_as_pdf', btn1Label: 'Drive', btn1Icon: 'cloud', btn1Url: '', btn2Label: 'Download', btn2Icon: 'download', btn2Url: '' });
   renderLinks();
 };
 window.updateSublink = (lIdx, sIdx, key, val) => {
@@ -782,7 +829,7 @@ window.handleSublinkFileUpload = async (event, lIdx, sIdx) => {
   try {
     const path = `assets/${file.name.replace(/\\s+/g, '-')}`;
     await uploadFileToGitHub(file, path);
-    currentConfig.links[lIdx].sublinks[sIdx].downloadUrl = path;
+    currentConfig.links[lIdx].sublinks[sIdx].btn2Url = path;
     document.getElementById(`dl-${lIdx}-${sIdx}`).value = path;
     statusEl.textContent = 'Upload successful!';
     setTimeout(() => statusEl.textContent = '', 3000);
