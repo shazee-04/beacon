@@ -396,10 +396,11 @@ function renderLinks() {
         </div>
       `;
     } else if (linkType === 'customCode') {
+      const escapedCustomCode = (link.customCode || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       typeConfigHtml = `
         <div class="form-group mb-3">
           <label>Custom Code (HTML/CSS/JS)</label>
-          <textarea style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; font-size: 13px; height: 180px; resize: vertical;" placeholder="<style>...</style>\n<div>...</div>\n<script>...</script>" onchange="updateLink(${index}, 'customCode', this.value)">${link.customCode || ''}</textarea>
+          <textarea style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; font-size: 13px; height: 180px; resize: vertical;" placeholder="<style>...</style>\n<div>...</div>\n<script>...</script>" onchange="updateLink(${index}, 'customCode', this.value)">${escapedCustomCode}</textarea>
           <small style="color: var(--text-muted); font-size: 0.8rem; display:block; margin-top:6px; line-height: 1.4;">
             💡 <strong>Developer Tip:</strong> Scope your CSS to avoid global leaks. Use unique class names (e.g. <code>.my-custom-card</code>) instead of generic selectors (like <code>div</code> or <code>p</code>) so you don't affect other elements on the page.
           </small>
@@ -505,7 +506,8 @@ window.changeLinkType = (index, type) => {
   delete link.isExpandableCard;
   delete link.expandableItems;
   delete link.expandedByDefault;
-  delete link.expandedByDefault;
+  delete link.isCustomCode;
+  delete link.customCode;
 
   if (type === 'sublinks') {
     link.sublinks = [];
