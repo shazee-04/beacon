@@ -422,7 +422,7 @@
           let btn1Html = '';
           if (btn1Url) {
             btn1Html = `
-              <a href="${btn1Url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-sublink-action d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
+              <a href="${btn1Url}" target="_blank" class="btn btn-sm btn-sublink-action d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
                 <span class="material-symbols-outlined fs-6">${sub.btn1Icon || 'cloud'}</span>
                 ${sub.btn1Label || 'Drive'}
               </a>
@@ -432,7 +432,7 @@
           let btn2Html = '';
           if (btn2Url) {
             btn2Html = `
-              <a href="${btn2Url}" download target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-sublink-primary d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
+              <a href="${btn2Url}" download class="btn btn-sm btn-sublink-primary d-inline-flex align-items-center gap-1 py-2 px-2 rounded-pill text-nowrap">
                 <span class="material-symbols-outlined fs-6">${sub.btn2Icon || 'download'}</span>
                 ${sub.btn2Label || 'Download'}
               </a>
@@ -480,18 +480,9 @@
       }
 
       if (link.isCustomCode) {
-        // Sandbox custom code in an iframe to prevent access to the parent page DOM, cookies, and storage
-        const escapedCode = (link.customCode || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
         return `
           <div class="custom-code-container mb-3 w-100" id="${link.id}">
-            <iframe
-              sandbox="allow-scripts"
-              srcdoc="${escapedCode}"
-              style="width: 100%; border: none; overflow: hidden; border-radius: 12px; min-height: 80px;"
-              scrolling="no"
-              loading="lazy"
-              onload="this.style.height = this.contentWindow.document.documentElement.scrollHeight + 'px'"
-            ></iframe>
+            ${link.customCode || ''}
           </div>
         `;
       }
@@ -510,6 +501,15 @@
         </a>
       `;
     }).join('');
+
+    // Execute scripts in custom code blocks
+    const scripts = linksListContainer.querySelectorAll('.custom-code-container script');
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
   }
 
   // Render Footer
