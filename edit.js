@@ -75,7 +75,7 @@ if (currentConfig.profile && currentConfig.profile.avatar) {
     link.rel = 'icon';
     document.head.appendChild(link);
   }
-  
+
   if (currentConfig.profile.avatar.length === 1) {
     link.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23000"/><text x="50" y="50" font-family="sans-serif" font-size="50" fill="%23fff" text-anchor="middle" dominant-baseline="central">${currentConfig.profile.avatar}</text></svg>`;
   } else {
@@ -266,6 +266,7 @@ function renderLinks() {
     else if (link.embedUrl) linkType = 'embed';
     else if (link.isBanner) linkType = 'banner';
     else if (link.isExpandableCard) linkType = 'expandableCard';
+    else if (link.isCustomCode) linkType = 'customCode';
 
     // Build specific options based on type
     let typeConfigHtml = '';
@@ -394,6 +395,16 @@ function renderLinks() {
           </div>
         </div>
       `;
+    } else if (linkType === 'customCode') {
+      typeConfigHtml = `
+        <div class="form-group mb-3">
+          <label>Custom Code (HTML/CSS/JS)</label>
+          <textarea style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; font-size: 13px; height: 180px; resize: vertical;" placeholder="<style>...</style>\n<div>...</div>\n<script>...</script>" onchange="updateLink(${index}, 'customCode', this.value)">${link.customCode || ''}</textarea>
+          <small style="color: var(--text-muted); font-size: 0.8rem; display:block; margin-top:6px; line-height: 1.4;">
+            💡 <strong>Developer Tip:</strong> Scope your CSS to avoid global leaks. Use unique class names (e.g. <code>.my-custom-card</code>) instead of generic selectors (like <code>div</code> or <code>p</code>) so you don't affect other elements on the page.
+          </small>
+        </div>
+      `;
     } else {
       typeConfigHtml = `
         <div class="form-group mb-3">
@@ -425,6 +436,7 @@ function renderLinks() {
               <option value="banner" ${linkType === 'banner' ? 'selected' : ''}>Image Banner Link</option>
               <option value="expandableCard" ${linkType === 'expandableCard' ? 'selected' : ''}>Expandable Image Card</option>
               <option value="sublinks" ${linkType === 'sublinks' ? 'selected' : ''}>Document Group / Sublinks</option>
+              <option value="customCode" ${linkType === 'customCode' ? 'selected' : ''}>Custom Code Component</option>
             </select>
           </div>
           <div class="form-group mb-3">
@@ -508,6 +520,9 @@ window.changeLinkType = (index, type) => {
     link.expandedByDefault = false;
     link.expandableItems = [];
     link.url = 'https://';
+  } else if (type === 'customCode') {
+    link.isCustomCode = true;
+    link.customCode = '<!-- Your code here -->';
   } else {
     link.url = 'https://';
   }
@@ -702,17 +717,17 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
     if (putRes.ok) {
       statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
       statusEl.style.color = '#388e3c'; // Green
-      
+
       // Clear draft after successful deploy
       localStorage.removeItem(DRAFT_KEY);
       lastSavedStr = JSON.stringify(currentConfig);
-      
+
       const discardBtn = document.getElementById('btn-discard-draft-top');
       if (discardBtn) discardBtn.style.display = 'none';
 
       const warningBanner = document.getElementById('draft-warning-banner');
       if (warningBanner) warningBanner.style.display = 'none';
-      
+
       const statusIndicator = document.getElementById('draft-status-indicator');
       if (statusIndicator) {
         statusIndicator.className = 'draft-status-pill saved';
@@ -1134,7 +1149,7 @@ window.toggleCollapse = (headerEl, type, index) => {
   const bodyEl = headerEl.nextElementSibling;
   const isNowCollapsed = headerEl.classList.contains('collapsed');
   if (bodyEl) bodyEl.classList.toggle('collapsed', isNowCollapsed);
-  
+
   if (currentConfig[type] && currentConfig[type][index]) {
     currentConfig[type][index]._isExpanded = !isNowCollapsed;
   }

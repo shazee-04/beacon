@@ -479,6 +479,14 @@
         `;
       }
 
+      if (link.isCustomCode) {
+        return `
+          <div class="custom-code-container mb-3 w-100" id="${link.id}">
+            ${link.customCode || ''}
+          </div>
+        `;
+      }
+
       // Normal link tile
       return `
         <a href="${link.url}" target="_blank" rel="noopener" class="link-tile d-flex align-items-center gap-3 p-3 border rounded-4 text-decoration-none mb-3" id="${link.id}">
@@ -493,6 +501,15 @@
         </a>
       `;
     }).join('');
+
+    // Execute scripts in custom code blocks
+    const scripts = linksListContainer.querySelectorAll('.custom-code-container script');
+    scripts.forEach(oldScript => {
+      const newScript = document.createElement('script');
+      Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+      newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
   }
 
   // Render Footer
