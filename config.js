@@ -86,7 +86,7 @@ window.APP_CONFIG = {
     },
     {
       id: "social-sponser",
-      label: "Sponser",
+      label: "Sponsor",
       url: "https://ko-fi.com/sacheee",
       icon: {
         type: "image",
@@ -115,12 +115,20 @@ window.APP_CONFIG = {
   featuredTitle: "",
   featured: [
     {
-      title: "Hailsham Hotel",
-      subtitle: "",
+      title: "Beacon — Link in Bio",
+      subtitle: "Open Source",
       badge: "Latest",
-      price: "$199",
+      description: "A premium, zero-database Linktree alternative. Configuration-driven, animated mesh background, and fully responsive.",
+      image: "https://github.com/user-attachments/assets/c43d8be7-7387-46c1-ba95-c75d8452acab",
+      url: "https://bio.shazee.dev",
+      actionLabel: "View Live"
+    },
+    {
+      title: "Hailsham Hotel",
+      subtitle: "Web Design",
+      badge: "Featured",
       description: "A premium, fully responsive luxury hotel website featuring immersive animations, smooth scroll experiences, and modern UI interactions.",
-      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=60",
+      image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/hailsham-bungalow.png",
       url: "https://hailsham.shazee.dev",
       actionLabel: "View Project"
     }
@@ -149,6 +157,30 @@ window.APP_CONFIG = {
       isExpandableCard: true,
       expandedByDefault: false,
       expandableItems: [
+        {
+          title: "E-Commerce Store",
+          desc: "A fully responsive eCommerce frontend for a mobile phone store with product listings, cart, checkout, and admin panel UI.",
+          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/modern-custom-ecommerce-store-development-ui.jpg",
+          url: "https://shazee-04.github.io/e-commerce-site"
+        },
+        {
+          title: "New Fashion Store",
+          desc: "A Java web application for a fashion e-commerce store, built using Jakarta Servlet API, Hibernate ORM, Jersey RESTful web services, BCrypt security, and MySQL.",
+          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/modern-fashion-ecommerce-store-web-application-2.jpg",
+          url: "https://github.com/shazee-04/new-fashion-store"
+        },
+        {
+          title: "Gym Management System",
+          desc: "A desktop application for managing a fitness center, built with Java Swing and styled with FlatLaf. Features member/trainer management, attendance, workout plans, product sales, payments, and one-click JasperReports.",
+          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/java-desktop-app-gym-management-system-standalone.jpg",
+          url: "https://github.com/shazee-04/gym-management-system"
+        },
+        {
+          title: "GitHub Profile README",
+          desc: "A custom personal profile dashboard showcasing my tech stack, GitHub stats, active streaks, and interactive contributions grid.",
+          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/responsive-modern-portfolio-development-project-showcase-2.jpg",
+          url: "https://github.com/shazee-04/shazee-04"
+        }
       ]
     },
     {
@@ -168,7 +200,7 @@ window.APP_CONFIG = {
       url: "https://www.fiverr.com/s/DB4YDa7",
       icon: {
         type: "image",
-        url: "assets/icons/Fiverr.svg"
+        url: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/icons/Fiverr.svg"
       }
     },
     {
@@ -182,25 +214,57 @@ window.APP_CONFIG = {
       sublinks: [
         {
           label: "SE Intern/Fullstack Developer",
-          driveUrl: "https://drive.google.com/file/d/1iVeRbBiHrUhZoq48N_VyVXtP-Vi8jc00/view?usp=sharing",
-          downloadUrl: "assets/CV-MGSSR-SE.pdf"
+          icon: "picture_as_pdf",
+          btn1Label: "View",
+          btn1Icon: "visibility",
+          btn1Url: "https://drive.google.com/file/d/1iVeRbBiHrUhZoq48N_VyVXtP-Vi8jc00/view?usp=sharing"
         },
         {
           label: "UI/UX Designer",
-          driveUrl: "https://drive.google.com/file/d/1rOdQF3rOipULLO5pib2-cyM5a8kiP4Yt/view?usp=sharing",
-          downloadUrl: "assets/CV-MGSSR-UIUX.pdf"
+          icon: "picture_as_pdf",
+          btn1Label: "View",
+          btn1Icon: "visibility",
+          btn1Url: "https://drive.google.com/file/d/1rOdQF3rOipULLO5pib2-cyM5a8kiP4Yt/view?usp=sharing"
         },
         {
           label: "Graphic Designer",
-          driveUrl: "https://drive.google.com/file/d/1cPY7QXiSXQp7iKhUm9zK3KzGZWmWxJCw/view?usp=sharing",
-          downloadUrl: "assets/CV-MGSSR-GRAPHIC-DESIGNER.pdf"
-        },
-        {
-          label: "View All",
-          driveUrl: "https://drive.google.com/drive/folders/1O98AGYLFV4pZWbq4ocQB2wP7VlGTMbJC?usp=sharing",
-          downloadUrl: "assets/CV-All.pdf"
+          icon: "picture_as_pdf",
+          btn1Label: "View",
+          btn1Icon: "visibility",
+          btn1Url: "https://drive.google.com/file/d/1cPY7QXiSXQp7iKhUm9zK3KzGZWmWxJCw/view?usp=sharing"
         }
       ]
+    },
+
+    {
+      id: "link-support",
+      label: "Support My Work",
+      subtitle: "Support my open-source tools and buy me a coffee",
+      url: "https://ko-fi.com/sacheee",
+      icon: {
+        type: "material",
+        name: "favorite"
+      }
+    },
+    {
+      id: "link-facebook",
+      label: "Facebook",
+      subtitle: "Connect with me on Facebook",
+      url: "https://facebook.com/shazeesandaruwan",
+      icon: {
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/facebook/default.svg"
+      }
+    },
+    {
+      id: "link-instagram",
+      label: "Instagram",
+      subtitle: "Follow my creative journey and behind-the-scenes",
+      url: "https://instagram.com/shazee.04",
+      icon: {
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/instagram/default.svg"
+      }
     },
     {
       id: "link-pinterest",
@@ -213,13 +277,23 @@ window.APP_CONFIG = {
       }
     },
     {
-      id: "link-support",
-      label: "Support My Work",
-      subtitle: "Support my open-source tools and buy me a coffee",
-      url: "https://ko-fi.com/sacheee",
+      id: "link-linkedin",
+      label: "LinkedIn",
+      subtitle: "View my professional profile and connect",
+      url: "https://linkedin.com/in/shazeesandaruwan",
       icon: {
-        type: "material",
-        name: "favorite"
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/linkedin/default.svg"
+      }
+    },
+    {
+      id: "link-twitter",
+      label: "Twitter / X",
+      subtitle: "Follow me for dev updates and design thoughts",
+      url: "https://twitter.com/shazee-04",
+      icon: {
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/x/default.svg"
       }
     }
   ],
