@@ -7,11 +7,11 @@
 window.APP_CONFIG = {
   // Profile settings
   profile: {
-    name: "MGSS RANGAJEEWA",
-    title: "Developer & Designer",
-    bio: "Fullstack Developer & UI/UX Designer based in Sri Lanka.",
-    avatar: "profile-image/profile.jpg",
-    username: "shazee-04"
+    name: "Beacon",
+    title: "Premium Link-in-Bio Template",
+    bio: "A lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and an ambient animated mesh background.",
+    avatar: "assets/icons/Beacon.png",
+    username: "shazee-04/beacon"
   },
 
   // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'cyberpunk-neon', 'abyss-slate', 'forest-shadow', 'custom')
@@ -32,9 +32,9 @@ window.APP_CONFIG = {
 
   // Skill tags
   skills: [
-    { label: "Fullstack", icon: "code" },
-    { label: "UI/UX", icon: "palette" },
-    { label: "Creative", icon: "auto_awesome" }
+    { label: "Zero-Database", icon: "dns" },
+    { label: "Serverless", icon: "cloud_queue" },
+    { label: "Config-Driven", icon: "settings" }
   ],
 
   // Social media quick action links (displayed on the profile card)
@@ -42,55 +42,37 @@ window.APP_CONFIG = {
     {
       id: "social-github",
       label: "GitHub",
-      url: "https://github.com/shazee-04",
+      url: "https://github.com/shazee-04/beacon",
       icon: {
         type: "image",
         url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/github/default.svg"
       }
     },
     {
-      id: "social-linkedin",
-      label: "LinkedIn",
-      url: "https://linkedin.com/in/shazee",
+      id: "social-github-sponsors",
+      label: "Sponsor",
+      url: "https://github.com/sponsors/shazee-04",
       icon: {
         type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/linkedin/default.svg"
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/github-sponsors/default.svg"
       }
     },
     {
-      id: "social-twitter",
-      label: "Twitter / X",
-      url: "https://twitter.com/shazee-04",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/x/default.svg"
-      }
-    },
-    {
-      id: "social-instagram",
-      label: "Instagram",
-      url: "https://instagram.com/shazee.04",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/instagram/default.svg"
-      }
-    },
-    {
-      id: "social-email",
-      label: "Email",
-      url: "mailto:mgssrangajeewa@gmail.com",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/gmail-2026/default.svg"
-      }
-    },
-    {
-      id: "social-sponser",
+      id: "social-sponsors",
       label: "Sponsor",
       url: "https://ko-fi.com/sacheee",
       icon: {
         type: "image",
         url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/ko-fi/default.svg"
+      }
+    },
+    {
+      id: "social-email",
+      label: "Contact Email",
+      url: "mailto:mgssrangajeewa@gmail.com",
+      icon: {
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/gmail-2026/default.svg"
       }
     }
   ],
@@ -98,202 +80,136 @@ window.APP_CONFIG = {
   // Prominent Call-To-Action buttons
   ctas: [
     {
-      label: "My Website",
-      url: "https://shazee.dev",
-      icon: "open_in_new",
+      label: "Live Demo",
+      url: "https://bio.shazee.dev",
+      icon: "visibility",
       style: "primary"
     },
     {
-      label: "My GitHub",
-      url: "https://github.com/shazee-04",
-      icon: "open_in_new",
+      label: "Fork Repository",
+      url: "https://github.com/shazee-04/beacon/fork",
+      icon: "call_split",
       style: "secondary"
     }
   ],
 
   // Featured highlights section
-  featuredTitle: "",
   featured: [
     {
-      title: "Beacon — Link in Bio",
-      subtitle: "Open Source",
-      badge: "Latest",
-      description: "A premium, zero-database Linktree alternative. Configuration-driven, animated mesh background, and fully responsive.",
-      image: "https://github.com/user-attachments/assets/c43d8be7-7387-46c1-ba95-c75d8452acab",
-      url: "https://bio.shazee.dev",
-      actionLabel: "View Live"
+      title: "Visual Admin Dashboard",
+      subtitle: "Visual Editor",
+      badge: "Built-in",
+      description: "Edit links, profile cards, and theme presets in real-time. Includes automatic localStorage autosave and direct GitHub API deployment.",
+      image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/admin-ui-beacon.png",
+      url: "edit.html",
+      actionLabel: "Open Editor"
     },
     {
-      title: "Hailsham Hotel",
-      subtitle: "Web Design",
-      badge: "Featured",
-      description: "A premium, fully responsive luxury hotel website featuring immersive animations, smooth scroll experiences, and modern UI interactions.",
-      image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/hailsham-bungalow.png",
-      url: "https://hailsham.shazee.dev",
-      actionLabel: "View Project"
+      title: "Premium Animations & Mesh",
+      subtitle: "Styling & UI",
+      badge: "Dynamic",
+      description: "Experience premium cursor-tracking parallax gradient mesh backgrounds and smooth transitions designed to impress visitors.",
+      image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/hompage-ui-beacon.gif",
+      url: "https://bio.shazee.dev",
+      actionLabel: "View Live Demo"
     }
   ],
 
   // Main vertical links list (curated for professional & social reach, avoiding duplicates)
   links: [
     {
-      id: "link-dev-portfolio",
-      label: "Developer Portfolio",
-      subtitle: "Explore my coding projects, web apps, and technical skills",
-      url: "https://shazee.dev/",
-      icon: {
-        type: "material",
-        name: "terminal"
-      }
-    },
-    {
-      id: "link-latest-project",
-      label: "Latest Project Breakdown",
-      subtitle: "Read about my latest design workflow and process",
-      icon: {
-        type: "material",
-        name: "article"
-      },
-      isExpandableCard: true,
-      expandedByDefault: false,
-      expandableItems: [
-        {
-          title: "E-Commerce Store",
-          desc: "A fully responsive eCommerce frontend for a mobile phone store with product listings, cart, checkout, and admin panel UI.",
-          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/modern-custom-ecommerce-store-development-ui.jpg",
-          url: "https://shazee-04.github.io/e-commerce-site"
-        },
-        {
-          title: "New Fashion Store",
-          desc: "A Java web application for a fashion e-commerce store, built using Jakarta Servlet API, Hibernate ORM, Jersey RESTful web services, BCrypt security, and MySQL.",
-          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/modern-fashion-ecommerce-store-web-application-2.jpg",
-          url: "https://github.com/shazee-04/new-fashion-store"
-        },
-        {
-          title: "Gym Management System",
-          desc: "A desktop application for managing a fitness center, built with Java Swing and styled with FlatLaf. Features member/trainer management, attendance, workout plans, product sales, payments, and one-click JasperReports.",
-          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/java-desktop-app-gym-management-system-standalone.jpg",
-          url: "https://github.com/shazee-04/gym-management-system"
-        },
-        {
-          title: "GitHub Profile README",
-          desc: "A custom personal profile dashboard showcasing my tech stack, GitHub stats, active streaks, and interactive contributions grid.",
-          image: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/responsive-modern-portfolio-development-project-showcase-2.jpg",
-          url: "https://github.com/shazee-04/shazee-04"
-        }
-      ]
-    },
-    {
-      id: "link-design-portfolio",
-      label: "Design & UI/UX Portfolio",
-      subtitle: "View my design case studies, wireframes, and creative works",
-      url: "https://drive.google.com/drive/folders/1cCZOZkVMOMjzhdT6GgkMP1cYsKO7hRpJ?usp=sharing",
-      icon: {
-        type: "material",
-        name: "palette"
-      }
-    },
-    {
-      id: "link-fiverr",
-      label: "Fiverr Freelance",
-      subtitle: "Hire me for web development and UI/UX design services",
-      url: "https://www.fiverr.com/s/DB4YDa7",
+      id: "link-github-repo",
+      label: "GitHub Repository",
+      subtitle: "Access the source code, report issues, or contribute back to the project",
+      url: "https://github.com/shazee-04/beacon",
       icon: {
         type: "image",
-        url: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/icons/Fiverr.svg"
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/github/default.svg"
       }
     },
     {
-      id: "link-cv",
-      label: "Curriculum Vitae (CV)",
-      subtitle: "Access my developer and designer resumes",
+      id: "link-deployments",
+      label: "One-Click Deployments",
+      subtitle: "Launch your own copy of Beacon to the web for free",
+      expandedByDefault: true,
       icon: {
-        type: "material",
-        name: "description"
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/vercel/light.svg"
       },
       sublinks: [
         {
-          label: "SE Intern/Fullstack Developer",
-          icon: "picture_as_pdf",
-          btn1Label: "View",
-          btn1Icon: "visibility",
-          btn1Url: "https://drive.google.com/file/d/1iVeRbBiHrUhZoq48N_VyVXtP-Vi8jc00/view?usp=sharing"
+          label: "Deploy with Vercel",
+          icon: "deployed_code",
+          btn1Label: "Deploy",
+          btn1Icon: "rocket_launch",
+          btn1Url: "https://vercel.com/new/clone?repository-url=github.com/shazee-04/beacon"
         },
         {
-          label: "UI/UX Designer",
-          icon: "picture_as_pdf",
-          btn1Label: "View",
-          btn1Icon: "visibility",
-          btn1Url: "https://drive.google.com/file/d/1rOdQF3rOipULLO5pib2-cyM5a8kiP4Yt/view?usp=sharing"
-        },
-        {
-          label: "Graphic Designer",
-          icon: "picture_as_pdf",
-          btn1Label: "View",
-          btn1Icon: "visibility",
-          btn1Url: "https://drive.google.com/file/d/1cPY7QXiSXQp7iKhUm9zK3KzGZWmWxJCw/view?usp=sharing"
+          label: "Deploy with Netlify",
+          icon: "deployed_code",
+          btn1Label: "Deploy",
+          btn1Icon: "rocket_launch",
+          btn1Url: "https://app.netlify.com/start/deploy?repository=github.com/shazee-04/beacon"
         }
       ]
     },
-
     {
-      id: "link-support",
-      label: "Support My Work",
-      subtitle: "Support my open-source tools and buy me a coffee",
-      url: "https://ko-fi.com/sacheee",
+      id: "link-features-breakdown",
+      label: "Supported Link Components",
+      subtitle: "Discover the interactive components and schemas built into Beacon",
       icon: {
         type: "material",
-        name: "favorite"
+        name: "widgets"
+      },
+      sublinks: [
+        {
+          label: "Standard Link Tile",
+          icon: "link",
+          btn1Label: "Docs",
+          btn1Icon: "menu_book",
+          btn1Url: "DOCUMENTATION.md#1-standard-link-tile"
+        },
+        {
+          label: "Collapsible Sublinks",
+          icon: "unfold_more",
+          btn1Label: "Docs",
+          btn1Icon: "menu_book",
+          btn1Url: "DOCUMENTATION.md#2-collapsible-nested-sublinks"
+        },
+        {
+          label: "Expandable Card Grid",
+          icon: "grid_view",
+          btn1Label: "Docs",
+          btn1Icon: "menu_book",
+          btn1Url: "DOCUMENTATION.md#3-expandable-card-grid"
+        },
+        {
+          label: "Audio/Video Embed Tile",
+          icon: "play_circle",
+          btn1Label: "Docs",
+          btn1Icon: "menu_book",
+          btn1Url: "DOCUMENTATION.md#4-interactive-audiovideo-embed-tile"
+        }
+      ]
+    },
+    {
+      id: "link-config-guide",
+      label: "Configuration Guide & Documentation",
+      subtitle: "Learn how to manually edit config settings, add sublinks, and set up Git keys",
+      url: "DOCUMENTATION.md",
+      icon: {
+        type: "image",
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/gitbook/default.svg"
       }
     },
     {
-      id: "link-facebook",
-      label: "Facebook",
-      subtitle: "Connect with me on Facebook",
-      url: "https://facebook.com/shazeesandaruwan",
+      id: "link-support",
+      label: "Support the Project",
+      subtitle: "Help fund development by buying the creator a coffee or starring the repository",
+      url: "https://ko-fi.com/sacheee",
       icon: {
         type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/facebook/default.svg"
-      }
-    },
-    {
-      id: "link-instagram",
-      label: "Instagram",
-      subtitle: "Follow my creative journey and behind-the-scenes",
-      url: "https://instagram.com/shazee.04",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/instagram/default.svg"
-      }
-    },
-    {
-      id: "link-pinterest",
-      label: "Pinterest Boards",
-      subtitle: "Explore my collections of design inspiration, moodboards, and art",
-      url: "https://pin.it/2Aqorqc1G",
-      icon: {
-        type: "image",
-        url: "https://cdn.simpleicons.org/pinterest"
-      }
-    },
-    {
-      id: "link-linkedin",
-      label: "LinkedIn",
-      subtitle: "View my professional profile and connect",
-      url: "https://linkedin.com/in/shazeesandaruwan",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/linkedin/default.svg"
-      }
-    },
-    {
-      id: "link-twitter",
-      label: "Twitter / X",
-      subtitle: "Follow me for dev updates and design thoughts",
-      url: "https://twitter.com/shazee-04",
-      icon: {
-        type: "image",
-        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/x/default.svg"
+        url: "https://cdn.jsdelivr.net/gh/glincker/thesvg@main/public/icons/ko-fi/default.svg"
       }
     }
   ],
@@ -304,4 +220,3 @@ window.APP_CONFIG = {
     text: "Built with"
   }
 };
-
