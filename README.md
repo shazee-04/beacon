@@ -338,6 +338,32 @@ window.APP_CONFIG = {
 
 ---
 
+## Beacon vs Alternative Bio Link Tools
+
+| Feature | Beacon | Linktree | Bento |
+|---------|--------|----------|-------|
+| **Cost** | 100% Free | Freemium | Freemium |
+| **Hosting** | Self-hosted (GitHub Pages/Vercel) | Managed | Managed |
+| **Database** | Zero-Database (Client-side) | Yes | Yes |
+| **Configuration** | Single `config.js` file | Dashboard | Dashboard |
+| **Data Ownership** | You own your data | Platform owned | Platform owned |
+| **SEO Ready** | Yes (Built-in JSON-LD) | Partial | Partial |
+
+---
+
+## Frequently Asked Questions (FAQ)
+
+**What is Beacon?**
+Beacon is a free, open-source, and self-hostable Link-in-Bio template designed as a premium alternative to Linktree. It features a zero-database architecture, meaning everything is driven by a single configuration file without requiring a backend.
+
+**How do I deploy Beacon?**
+You can deploy Beacon in one click to GitHub Pages, Vercel, or Netlify. Since it is entirely static (HTML/CSS/JS), there are no build steps or complex hosting requirements.
+
+**Does Beacon have a dashboard?**
+Yes. Beacon includes a built-in visual editor (`edit.html`) that runs entirely in your browser. It allows you to drag-and-drop links, change themes, and publish updates directly to your GitHub repository using a Personal Access Token.
+
+---
+
 ## Customization
 
 ### Theme Variables

@@ -135,9 +135,89 @@
 
   applyTheme(config.theme);
 
-  // Set Document Title
-  if (config.profile && config.profile.username) {
-    document.title = `Beacon | @${config.profile.username}`;
+  // --- Dynamic SEO & Meta Tag Injection ---
+  if (config.profile) {
+    const profileName = config.profile.name || 'Beacon';
+    const profileTitle = config.profile.title || 'Link-in-Bio';
+    const profileBio = config.profile.bio || '';
+    const seoTitle = `${profileName} — ${profileTitle} | Links & Profile`;
+    
+    // Update Document Title
+    document.title = seoTitle;
+
+    // Helper to add or update meta tags
+    const setMetaTag = (attr, attrValue, content) => {
+      if (!content) return;
+      let tag = document.querySelector(`meta[${attr}="${attrValue}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute(attr, attrValue);
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', content);
+    };
+
+    // Description
+    const metaDesc = `${profileName} — ${profileTitle}. ${profileBio.substring(0, 100)}... Find all links, socials, and projects in one place.`;
+    setMetaTag('name', 'description', metaDesc);
+
+    // Get SEO config with smart fallbacks
+    const seo = config.seo || {};
+    const siteUrl = seo.siteUrl || window.location.origin;
+    const ogImage = seo.ogImage || (config.profile.avatar.length > 1 ? config.profile.avatar : '');
+    
+    // Canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', siteUrl);
+
+    // Open Graph Tags
+    setMetaTag('property', 'og:type', 'profile');
+    setMetaTag('property', 'og:title', seoTitle);
+    setMetaTag('property', 'og:description', metaDesc);
+    setMetaTag('property', 'og:url', siteUrl);
+    if (ogImage) setMetaTag('property', 'og:image', ogImage);
+    if (config.profile.name) {
+      const parts = config.profile.name.split(' ');
+      setMetaTag('property', 'profile:first_name', parts[0]);
+      if (parts.length > 1) setMetaTag('property', 'profile:last_name', parts.slice(1).join(' '));
+    }
+
+    // Twitter Card Tags
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', seoTitle);
+    setMetaTag('name', 'twitter:description', metaDesc);
+    if (ogImage) setMetaTag('name', 'twitter:image', ogImage);
+    if (seo.twitterHandle) setMetaTag('name', 'twitter:site', seo.twitterHandle);
+
+    // JSON-LD ProfilePage & Person Schema
+    const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
+    const schemaData = {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "dateModified": new Date().toISOString().split('T')[0],
+      "mainEntity": {
+        "@type": "Person",
+        "name": profileName,
+        "jobTitle": profileTitle,
+        "description": profileBio,
+        "url": siteUrl,
+        "sameAs": sameAsLinks
+      }
+    };
+    if (ogImage) schemaData.mainEntity.image = ogImage;
+    
+    let schemaScript = document.querySelector('script[type="application/ld+json"]');
+    if (!schemaScript) {
+      schemaScript = document.createElement('script');
+      schemaScript.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(schemaScript);
+    }
+    schemaScript.textContent = JSON.stringify(schemaData);
   }
 
   // Render Avatar and Favicon

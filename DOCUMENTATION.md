@@ -208,6 +208,31 @@ theme: {
 
 ---
 
+## SEO & Metadata Customization
+
+Beacon automatically optimizes your bio link for search engines and AI agents (ChatGPT, Perplexity, Claude) by injecting dynamic meta tags, Open Graph data, and JSON-LD structured data.
+
+### Smart Defaults
+By default, Beacon automatically generates:
+- **Title and Description**: Using your `profile.name`, `profile.title`, and `profile.bio`.
+- **JSON-LD Schema**: Automatically generates `Person` and `ProfilePage` schema to help search engines understand your identity and social links.
+
+### Advanced SEO Configuration
+For complete control, you can define an `seo` block in your `config.js`:
+
+```javascript
+seo: {
+  siteUrl: "https://yourdomain.com",       // Your canonical URL (important for SEO)
+  ogImage: "assets/preview.png",           // Open Graph share image for social media
+  twitterHandle: "@your_handle",           // Twitter/X handle for cards
+  keywords: "bio link, portfolio, developer" // Custom meta keywords
+}
+```
+
+If any of these values are missing, Beacon intelligently falls back to your profile data and avatar.
+
+---
+
 ## Export & Deployment Options
 
 Beacon provides three deployment strategies:

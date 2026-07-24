@@ -14,6 +14,14 @@ window.APP_CONFIG = {
     username: "shazee-04/beacon"
   },
 
+  // SEO settings (Smart defaults are used if omitted)
+  seo: {
+    siteUrl: "https://beacon.shazee.dev",          // Your canonical URL (important for SEO)
+    ogImage: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/admin-ui-beacon.png", // Open Graph share image
+    twitterHandle: "@shazee_04",                 // Twitter/X handle
+    keywords: "bio link, linktree alternative, open source, self-hosted"
+  },
+
   // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'cyberpunk-neon', 'abyss-slate', 'forest-shadow', 'custom')
   theme: {
     preset: "monochrome-ink",
