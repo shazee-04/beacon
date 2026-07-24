@@ -588,6 +588,9 @@ window.APP_CONFIG = {
   // Profile settings
   profile: ${indentJSON(cleanConfig.profile)},
 
+  // SEO settings (Smart defaults are used if omitted)
+  seo: ${indentJSON(cleanConfig.seo)},
+
   // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'custom')
   theme: ${indentJSON(cleanConfig.theme)},
 
