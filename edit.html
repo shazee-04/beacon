@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Beacon Editor — Visual Config Builder for Link in Bio</title>
+  <title>Beacon Editor • Visual Config Builder for Link in Bio</title>
   <meta name="description" content="Visual editor for Beacon link in bio template. Drag-and-drop links, change themes, edit profile data, and deploy directly to GitHub.">
   <meta name="keywords" content="beacon editor, bio link editor, linktree admin dashboard, static bio link builder">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -399,7 +399,18 @@
               <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Download index.html
             </button>
           </div>
-          <textarea id="export-code-index" class="code-area" readonly placeholder="Your generated index.html will appear here..."></textarea>
+          <textarea id="export-code-index" class="code-area mb-4" readonly placeholder="Your generated index.html will appear here..."></textarea>
+
+          <h4 style="font-size: 14px; margin-bottom: 8px;">3. sitemap.xml</h4>
+          <div class="export-actions mb-2" style="justify-content: flex-start; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-copy-sitemap">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span> Copy
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-download-sitemap">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Download sitemap.xml
+            </button>
+          </div>
+          <textarea id="export-code-sitemap" class="code-area" readonly placeholder="Your generated sitemap.xml will appear here..."></textarea>
         </div>
       </div>
 

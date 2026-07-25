@@ -637,7 +637,56 @@ window.APP_CONFIG = {
 `;
 }
 
-function generateIndexHtml() {
+async function fetchBaseIndexHtml() {
+  // Try fetching from github if credentials are present
+  const username = ghUsernameInput?.value?.trim();
+  const repo = ghRepoInput?.value?.trim();
+  const token = ghTokenInput?.value?.trim();
+
+  if (username && repo) {
+    try {
+      const url = `https://api.github.com/repos/${username}/${repo}/contents/index.html`;
+      const headers = { 'Accept': 'application/vnd.github.v3.raw' };
+      if (token) headers['Authorization'] = `token ${token}`;
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        return await res.text();
+      }
+    } catch(e) {
+      console.warn("Failed to fetch template from GitHub. Falling back to local file.", e);
+    }
+  }
+
+  // Fallback to local fetch
+  try {
+    const res = await fetch('index.html');
+    if (res.ok) {
+      return await res.text();
+    }
+  } catch(e) {
+    console.warn("Failed to fetch local index.html.", e);
+  }
+
+  throw new Error("Could not fetch base index.html template.");
+}
+
+function generateSitemapXml() {
+  const config = currentConfig;
+  const siteUrl = config.seo?.siteUrl || 'https://beacon.shazee.dev';
+  const lastMod = new Date().toISOString().split('T')[0];
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${siteUrl}/</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+}
+
+async function generateIndexHtml() {
   const config = currentConfig;
   const profileName = config.profile?.name || 'Beacon';
   const profileTitle = config.profile?.title || 'Link-in-Bio';
@@ -660,6 +709,14 @@ function generateIndexHtml() {
 
   // Schema Generation
   const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
+  
+  const itemElements = (config.links || []).map((link, idx) => ({
+    "@type": "SiteNavigationElement",
+    "position": idx + 1,
+    "name": link.label,
+    "url": link.url || siteUrl
+  }));
+
   const schemaData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -674,83 +731,66 @@ function generateIndexHtml() {
           "url": siteUrl,
           "sameAs": sameAsLinks
         }
+      },
+      {
+        "@type": "ItemList",
+        "name": `${profileName} Links`,
+        "itemListElement": itemElements
       }
     ]
   };
   if (ogImage) schemaData["@graph"][0].mainEntity.image = ogImage;
 
-  return `<!DOCTYPE html>
-<html lang="${language}">
+  const baseHtml = await fetchBaseIndexHtml();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(baseHtml, 'text/html');
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${seoTitle}</title>
-  <meta name="description" content="${metaDesc}">
-  <meta name="keywords" content="${keywords}">
-  <meta name="author" content="${profileName}">
-  <meta name="generator" content="Beacon Link-in-Bio">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-  <link rel="canonical" href="${siteUrl}">
-
-  <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="profile">
-  <meta property="og:url" content="${siteUrl}">
-  <meta property="og:title" content="${seoTitle}">
-  <meta property="og:description" content="${metaDesc}">
-  ${ogImage ? `<meta property="og:image" content="${ogImage}">\n  <meta property="og:image:type" content="image/png">` : ''}
-  <meta property="og:site_name" content="${profileName}">
-
-  <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  ${seo.twitterHandle ? `<meta name="twitter:site" content="${seo.twitterHandle}">` : ''}
-  <meta name="twitter:title" content="${seoTitle}">
-  <meta name="twitter:description" content="${metaDesc}">
-  ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
-
-  <meta name="theme-color" content="${themeColor}">
-  <link rel="apple-touch-icon" href="assets/icons/Beacon.png">
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Static Structured Data (JSON-LD) for Search Engines & AI Crawlers -->
-  <script type="application/ld+json">
-  ${JSON.stringify(schemaData, null, 2)}
-  </script>
-
-  <link rel="icon" href="assets/icons/beacon.png" type="image/x-icon">
-
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
-    rel="stylesheet">
-
-  <!-- Material Symbols Outlined -->
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-    rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
-    rel="stylesheet">
-
-  <link rel="stylesheet" href="style.css">
+  doc.documentElement.lang = language;
   
-  <!-- Global configuration data -->
-  <script src="config.js"></script>
-</head>
+  const setMeta = (attr, attrValue, content) => {
+    if (!content) return;
+    let el = doc.querySelector(`meta[${attr}="${attrValue}"]`);
+    if (!el) {
+      el = doc.createElement('meta');
+      el.setAttribute(attr, attrValue);
+      doc.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+  };
 
-<body>
-  <!-- Ambient background -->
-  <div class="bg-mesh" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-  </div>
+  doc.title = seoTitle;
+  setMeta('name', 'description', metaDesc);
+  setMeta('name', 'keywords', keywords);
+  setMeta('name', 'author', profileName);
+  setMeta('name', 'theme-color', themeColor);
+  
+  let canonical = doc.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.setAttribute('href', siteUrl);
 
-  <!-- Fallback for non-JS crawlers (AI bots, search spiders) -->
-  <noscript>
+  setMeta('property', 'og:type', 'profile');
+  setMeta('property', 'og:url', siteUrl);
+  setMeta('property', 'og:title', seoTitle);
+  setMeta('property', 'og:description', metaDesc);
+  setMeta('property', 'og:site_name', profileName);
+  if (ogImage) {
+    setMeta('property', 'og:image', ogImage);
+    setMeta('property', 'og:image:type', 'image/png');
+  }
+
+  setMeta('name', 'twitter:card', 'summary_large_image');
+  if (seo.twitterHandle) setMeta('name', 'twitter:site', seo.twitterHandle);
+  setMeta('name', 'twitter:title', seoTitle);
+  setMeta('name', 'twitter:description', metaDesc);
+  if (ogImage) setMeta('name', 'twitter:image', ogImage);
+
+  let jsonLd = doc.querySelector('script[type="application/ld+json"]');
+  if (jsonLd) {
+    jsonLd.textContent = '\\n  ' + JSON.stringify(schemaData, null, 2) + '\\n  ';
+  }
+
+  const noscript = doc.querySelector('noscript');
+  if (noscript) {
+    noscript.innerHTML = `
     <div class="container py-5 text-center">
       <h1>${profileName}</h1>
       <p class="lead">${profileTitle}</p>
@@ -760,107 +800,17 @@ function generateIndexHtml() {
         ${(config.socials || []).map(s => `<li><a href="${s.url}">${s.label}</a></li>`).join('\\n        ')}
       </ul>
     </div>
-  </noscript>
+  `;
+  }
 
-  <main class="container py-5">
-    <div class="layout-grid">
-      <!-- Sidebar Column (Profile Card + Footer) -->
-      <div class="sidebar-column">
-        <!-- ═══ Employee ID Badge Card ═══ -->
-        <section class="badge-card card border-0 shadow-sm rounded-5" aria-label="Profile">
-          <!-- Badge surface -->
-          <div class="badge-surface p-4 text-center">
-            <!-- Photo / Avatar area -->
-            <div class="badge-photo-area mb-3 d-flex justify-content-center">
-              <div class="badge-photo d-flex align-items-center justify-content-center shadow-sm" id="profile-avatar-container">
-                <!-- Populate dynamically -->
-              </div>
-            </div>
-
-            <!-- Identity info -->
-            <div class="badge-identity mb-3" id="profile-identity-container">
-              <!-- Populate dynamically -->
-            </div>
-
-            <!-- Skill chips -->
-            <div class="badge-chips d-flex justify-content-center flex-wrap gap-2 mb-4" id="profile-skills-container">
-              <!-- Populate dynamically -->
-            </div>
-
-            <hr class="my-3 text-secondary-emphasis opacity-25">
-
-            <!-- Social icons row -->
-            <nav class="badge-socials d-flex justify-content-center gap-2 mb-4" aria-label="Social media profiles" id="profile-socials-container">
-              <!-- Populate dynamically -->
-            </nav>
-
-            <hr class="my-3 text-secondary-emphasis opacity-25">
-
-            <!-- CTA button -->
-            <div class="badge-cta" id="profile-cta-container">
-              <!-- Populate dynamically -->
-            </div>
-          </div>
-        </section>
-
-        <footer class="footer text-center mt-auto py-4" id="footer-container">
-          <!-- Populate dynamically -->
-        </footer>
-      </div>
-
-      <!-- Content Column -->
-      <div class="content-column">
-        <!-- Featured items container -->
-        <section id="featured-container" class="mb-3" style="display: none;">
-          <!-- Populate dynamically -->
-        </section>
-
-        <!-- Links list -->
-        <nav class="links-list" aria-label="All links" id="links-list-container">
-          <!-- Populate dynamically -->
-        </nav>
-      </div>
-    </div>
-  </main>
-
-  <!-- Promo Toast Popup -->
-  <div id="promo-popup-wrapper" class="promo-popup-wrapper" aria-hidden="true">
-    <div id="promo-popup" class="promo-popup">
-      <div class="promo-content">
-        <div class="promo-header">
-          <div class="d-flex align-items-center gap-2">
-            <span class="material-symbols-outlined promo-icon">auto_awesome</span>
-            <span class="promo-badge">Free & Open Source</span>
-          </div>
-          <button id="promo-close" class="promo-close-btn" aria-label="Dismiss invite">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <h5 class="promo-title">Create your own bio link</h5>
-        <p class="promo-text">Clone this <strong>free & open-source</strong> template. Fully customizable, interactive, and perfect for <strong>privacy</strong> and <strong>self-hosting</strong> in minutes.</p>
-        <div class="promo-actions">
-          <a href="https://github.com/shazee-04/beacon" target="_blank" rel="noopener" class="btn btn-promo w-100 rounded-pill py-2 px-3 d-inline-flex align-items-center justify-content-center gap-1">
-            Build For Free
-            <span class="material-icons fs-6">favorite</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap 5 Bundle JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-  <script src="script.js"></script>
-</body>
-
-</html>`;
+  return '<!DOCTYPE html>\\n' + doc.documentElement.outerHTML;
 }
 
-document.getElementById('btn-generate').addEventListener('click', () => {
+document.getElementById('btn-generate').addEventListener('click', async () => {
   document.getElementById('export-areas').style.display = 'block';
   document.getElementById('export-code-config').value = generateConfigCode();
-  document.getElementById('export-code-index').value = generateIndexHtml();
+  document.getElementById('export-code-index').value = await generateIndexHtml();
+  document.getElementById('export-code-sitemap').value = generateSitemapXml();
 });
 
 function handleCopy(textAreaId, btnId) {
@@ -898,8 +848,10 @@ function handleDownload(textAreaId, filename) {
 
 document.getElementById('btn-copy-config').addEventListener('click', () => handleCopy('export-code-config', 'btn-copy-config'));
 document.getElementById('btn-copy-index').addEventListener('click', () => handleCopy('export-code-index', 'btn-copy-index'));
+document.getElementById('btn-copy-sitemap').addEventListener('click', () => handleCopy('export-code-sitemap', 'btn-copy-sitemap'));
 document.getElementById('btn-download-config').addEventListener('click', () => handleDownload('export-code-config', 'config.js'));
 document.getElementById('btn-download-index').addEventListener('click', () => handleDownload('export-code-index', 'index.html'));
+document.getElementById('btn-download-sitemap').addEventListener('click', () => handleDownload('export-code-sitemap', 'sitemap.xml'));
 
 // --- GitHub Deployment ---
 const ghUsernameInput = document.getElementById('gh-username');
@@ -943,84 +895,96 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
   statusEl.textContent = 'Preparing configuration...';
   statusEl.style.color = 'var(--text-main)';
 
-  const codeConfig = generateConfigCode();
-  const codeIndexHtml = generateIndexHtml();
-
   try {
-    // ---- 1. Deploy config.js ----
-    statusEl.textContent = 'Fetching current config.js status...';
+    const codeConfig = generateConfigCode();
+    const codeIndexHtml = await generateIndexHtml();
+    const codeSitemapXml = generateSitemapXml();
+
+    statusEl.textContent = 'Preparing atomic commit...';
     
-    const configUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
-    let configRes = await fetch(configUrl, {
+    // 1. Get current commit reference
+    const refUrl = `https://api.github.com/repos/${username}/${repo}/git/refs/heads/main`;
+    let refRes = await fetch(refUrl, {
       headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
     });
-    
-    let configSha = null;
-    if (configRes.ok) {
-      const data = await configRes.json();
-      configSha = data.sha;
-    } else if (configRes.status !== 404) {
-      throw new Error('Failed to fetch config.js. Check your credentials and repo name.');
+    if (!refRes.ok) {
+      refRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/refs/heads/master`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!refRes.ok) throw new Error('Failed to fetch repository branch (tried main and master).');
     }
+    const refData = await refRes.json();
+    const currentSha = refData.object.sha;
+    const branchName = refData.ref.replace('refs/', '');
 
-    statusEl.textContent = 'Pushing config.js to GitHub...';
-    let putConfigRes = await fetch(configUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
+    // 2. Get current tree
+    const commitRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits/${currentSha}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    const commitData = await commitRes.json();
+    const baseTreeSha = commitData.tree.sha;
+
+    statusEl.textContent = 'Creating git blobs...';
+    
+    const createBlob = async (content) => {
+      const res = await fetch(`https://api.github.com/repos/${username}/${repo}/git/blobs`, {
+        method: 'POST',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content, encoding: 'utf-8' })
+      });
+      if (!res.ok) throw new Error('Failed to create git blob.');
+      const data = await res.json();
+      return data.sha;
+    };
+
+    const configBlobSha = await createBlob(codeConfig);
+    const indexBlobSha = await createBlob(codeIndexHtml);
+    const sitemapBlobSha = await createBlob(codeSitemapXml);
+
+    statusEl.textContent = 'Committing changes...';
+
+    // 3. Create new tree
+    const treeRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/trees`, {
+      method: 'POST',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Update config.js via Bio Link Editor',
-        content: btoa(unescape(encodeURIComponent(codeConfig))),
-        sha: configSha
+        base_tree: baseTreeSha,
+        tree: [
+          { path: 'config.js', mode: '100644', type: 'blob', sha: configBlobSha },
+          { path: 'index.html', mode: '100644', type: 'blob', sha: indexBlobSha },
+          { path: 'sitemap.xml', mode: '100644', type: 'blob', sha: sitemapBlobSha }
+        ]
       })
     });
+    if (!treeRes.ok) throw new Error('Failed to create git tree.');
+    const treeData = await treeRes.json();
+    const newTreeSha = treeData.sha;
 
-    if (!putConfigRes.ok) {
-      const errorData = await putConfigRes.json();
-      throw new Error(errorData.message || 'Failed to update config.js.');
-    }
-
-    // ---- 2. Deploy index.html ----
-    statusEl.textContent = 'Fetching current index.html status...';
-    
-    const indexUrl = `https://api.github.com/repos/${username}/${repo}/contents/index.html`;
-    let indexRes = await fetch(indexUrl, {
-      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-    });
-    
-    let indexSha = null;
-    if (indexRes.ok) {
-      const data = await indexRes.json();
-      indexSha = data.sha;
-    } else if (indexRes.status !== 404) {
-      throw new Error('Failed to fetch index.html.');
-    }
-
-    statusEl.textContent = 'Pushing index.html to GitHub...';
-    let putIndexRes = await fetch(indexUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
+    // 4. Create commit
+    const newCommitRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits`, {
+      method: 'POST',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Update index.html (SEO) via Bio Link Editor',
-        content: btoa(unescape(encodeURIComponent(codeIndexHtml))),
-        sha: indexSha
+        message: 'Publish update via Bio Link Editor',
+        tree: newTreeSha,
+        parents: [currentSha]
       })
     });
+    if (!newCommitRes.ok) throw new Error('Failed to create git commit.');
+    const newCommitData = await newCommitRes.json();
+    const newCommitSha = newCommitData.sha;
 
-    if (!putIndexRes.ok) {
-      const errorData = await putIndexRes.json();
-      throw new Error(errorData.message || 'Failed to update index.html.');
-    }
+    // 5. Update reference
+    statusEl.textContent = 'Pushing commit to GitHub...';
+    const updateRefRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/${branchName}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sha: newCommitSha })
+    });
+    if (!updateRefRes.ok) throw new Error('Failed to update branch reference.');
 
     // ---- Success ----
-    statusEl.textContent = 'Successfully deployed both files! Changes should be live in ~30 seconds.';
+    statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
     statusEl.style.color = '#388e3c'; // Green
 
     // Clear draft after successful deploy
