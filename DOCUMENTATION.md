@@ -218,7 +218,7 @@ By default, Beacon automatically generates:
 - **JSON-LD Schema**: Automatically generates `Person` and `ProfilePage` schema to help search engines understand your identity and social links.
 
 ### Advanced SEO Configuration
-For complete control, you can define an `seo` block in your `config.js`:
+You can configure SEO metadata visually in the **SEO Tab** of the Visual Editor (`edit.html`), or manually by defining an `seo` block in `config.js`:
 
 ```javascript
 seo: {

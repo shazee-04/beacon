@@ -140,7 +140,8 @@
     const profileName = config.profile.name || 'Beacon';
     const profileTitle = config.profile.title || 'Link-in-Bio';
     const profileBio = config.profile.bio || '';
-    const seoTitle = `${profileName} • ${profileTitle} | Beacon`;
+    const isBeaconBrand = profileName.toLowerCase().includes('beacon');
+    const seoTitle = isBeaconBrand ? `${profileName} • ${profileTitle}` : `${profileName} • ${profileTitle} | Beacon`;
     
     // Update Document Title
     document.title = seoTitle;

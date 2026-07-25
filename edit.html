@@ -41,6 +41,7 @@
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-tab="profile"><span class="material-symbols-outlined">person</span> Profile</button>
+        <button class="nav-btn" data-tab="seo"><span class="material-symbols-outlined">search</span> SEO</button>
         <button class="nav-btn" data-tab="theme"><span class="material-symbols-outlined">brush</span> Theme</button>
         <button class="nav-btn" data-tab="skills"><span class="material-symbols-outlined">palette</span> Skills</button>
         <button class="nav-btn" data-tab="socials"><span class="material-symbols-outlined">share</span> Socials</button>
@@ -103,6 +104,33 @@
             <button class="btn btn-secondary" onclick="document.getElementById('prof-avatar-file').click()" title="Upload to GitHub"><span class="material-symbols-outlined" style="font-size:18px;">upload_file</span></button>
           </div>
           <small id="avatar-upload-status" style="display:block; margin-top:4px; color:var(--primary); font-weight:500;"></small>
+        </div>
+      </div>
+
+      <!-- SEO Tab -->
+      <div id="seo" class="tab-pane">
+        <header class="pane-header">
+          <h3>SEO & Metadata Settings</h3>
+          <p>Customize Open Graph share links, meta tags, and search engine metadata.</p>
+        </header>
+        <div class="form-group">
+          <label>Canonical Site URL</label>
+          <input type="text" id="seo-site-url" placeholder="https://beacon.shazee.dev">
+          <small style="color:var(--text-muted); font-size:12px;">Your deployed URL (important for canonical tags and social sharing).</small>
+        </div>
+        <div class="form-group">
+          <label>Open Graph Share Image URL</label>
+          <input type="text" id="seo-og-image" placeholder="https://beacon.shazee.dev/assets/icons/Beacon.png">
+          <small style="color:var(--text-muted); font-size:12px;">Image displayed when sharing your bio link on Discord, Twitter, or WhatsApp.</small>
+        </div>
+        <div class="form-group">
+          <label>Twitter / X Handle</label>
+          <input type="text" id="seo-twitter-handle" placeholder="@shazee_04">
+        </div>
+        <div class="form-group">
+          <label>Meta Keywords</label>
+          <textarea id="seo-keywords" rows="2" placeholder="bio link, portfolio, linktree alternative"></textarea>
+          <small style="color:var(--text-muted); font-size:12px;">Comma-separated keywords for search engine indexing.</small>
         </div>
       </div>
 

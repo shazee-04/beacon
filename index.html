@@ -29,6 +29,10 @@
   <meta name="twitter:description" content="A free, open-source, zero-database Linktree alternative with an ambient animated mesh background, visual editor, and one-click deployment.">
   <meta name="twitter:image" content="https://beacon.shazee.dev/assets/icons/Beacon.png">
 
+  <meta name="theme-color" content="#4B47B7">
+  <link rel="apple-touch-icon" href="assets/icons/Beacon.png">
+  <link rel="manifest" href="manifest.json">
+
   <!-- Static Structured Data (JSON-LD) for Search Engines & AI Crawlers -->
   <script type="application/ld+json">
   {
@@ -54,6 +58,37 @@
           "priceCurrency": "USD"
         },
         "description": "A lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and ambient animated mesh background."
+      },
+      {
+        "@type": "SoftwareSourceCode",
+        "@id": "https://beacon.shazee.dev/#sourcecode",
+        "name": "Beacon Source Code",
+        "codeRepository": "https://github.com/shazee-04/beacon",
+        "programmingLanguage": ["HTML", "CSS", "JavaScript"],
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {
+          "@type": "Person",
+          "name": "MGSS RANGAJEEWA",
+          "url": "https://shazee.dev"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://beacon.shazee.dev/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://beacon.shazee.dev"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Visual Editor",
+            "item": "https://beacon.shazee.dev/edit.html"
+          }
+        ]
       },
       {
         "@type": "ImageObject",
@@ -113,16 +148,20 @@
     <div class="blob blob-3"></div>
   </div>
 
-  <!-- Fallback for non-JS crawlers (AI bots, old search engines) -->
+  <!-- Fallback for non-JS crawlers (AI bots, search spiders) -->
   <noscript>
     <div class="container py-5 text-center">
-      <h1>Beacon</h1>
-      <p>Premium Link-in-Bio Template</p>
-      <p>A lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and an ambient animated mesh background.</p>
-      <div style="margin-top: 2rem;">
-        <a href="https://github.com/shazee-04/beacon">GitHub Repository</a> | 
-        <a href="DOCUMENTATION.md">Documentation</a>
-      </div>
+      <h1>Beacon — Free & Open Source Link-in-Bio</h1>
+      <p class="lead">A lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and ambient animated mesh background.</p>
+      <p>Beacon is a zero-database, serverless Linktree alternative built with vanilla HTML, CSS, and JavaScript. Host for free on GitHub Pages, Vercel, or Netlify.</p>
+      <hr style="max-width: 400px; margin: 2rem auto;">
+      <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <li><a href="https://github.com/shazee-04/beacon">GitHub Repository</a></li>
+        <li><a href="DOCUMENTATION.md">Documentation</a></li>
+        <li><a href="edit.html">Visual Editor</a></li>
+        <li><a href="llms.txt">AI Context (llms.txt)</a></li>
+        <li><a href="sitemap.xml">Sitemap</a></li>
+      </ul>
     </div>
   </noscript>
 

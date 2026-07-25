@@ -67,6 +67,13 @@ bindInput('prof-title', currentConfig.profile, 'title');
 bindInput('prof-bio', currentConfig.profile, 'bio');
 bindInput('prof-avatar', currentConfig.profile, 'avatar');
 
+// Bind SEO
+if (!currentConfig.seo) currentConfig.seo = {};
+bindInput('seo-site-url', currentConfig.seo, 'siteUrl');
+bindInput('seo-og-image', currentConfig.seo, 'ogImage');
+bindInput('seo-twitter-handle', currentConfig.seo, 'twitterHandle');
+bindInput('seo-keywords', currentConfig.seo, 'keywords');
+
 // Set Favicon on load
 if (currentConfig.profile && currentConfig.profile.avatar) {
   let link = document.querySelector("link[rel~='icon']");
