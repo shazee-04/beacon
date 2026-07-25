@@ -67,6 +67,28 @@ bindInput('prof-title', currentConfig.profile, 'title');
 bindInput('prof-bio', currentConfig.profile, 'bio');
 bindInput('prof-avatar', currentConfig.profile, 'avatar');
 
+// Bind SEO
+if (!currentConfig.seo) currentConfig.seo = {};
+bindInput('seo-site-url', currentConfig.seo, 'siteUrl');
+bindInput('seo-og-image', currentConfig.seo, 'ogImage');
+bindInput('seo-twitter-handle', currentConfig.seo, 'twitterHandle');
+bindInput('seo-keywords', currentConfig.seo, 'keywords');
+bindInput('seo-page-title', currentConfig.seo, 'pageTitle');
+bindInput('seo-meta-desc', currentConfig.seo, 'metaDescription');
+bindInput('seo-language', currentConfig.seo, 'language');
+bindInput('seo-theme-color', currentConfig.seo, 'themeColor');
+
+// Handle Theme Color Sync
+const themeColorPicker = document.getElementById('seo-theme-color-picker');
+const themeColorText = document.getElementById('seo-theme-color');
+if (themeColorPicker && themeColorText) {
+  themeColorPicker.value = currentConfig.seo.themeColor || '#222222';
+  themeColorPicker.addEventListener('input', (e) => {
+    currentConfig.seo.themeColor = e.target.value;
+    themeColorText.value = e.target.value;
+  });
+}
+
 // Set Favicon on load
 if (currentConfig.profile && currentConfig.profile.avatar) {
   let link = document.querySelector("link[rel~='icon']");
@@ -566,7 +588,7 @@ document.getElementById('add-link').addEventListener('click', () => {
 });
 
 
-// --- Export Configuration ---
+// --- Export Configuration & HTML ---
 function generateConfigCode() {
   const cleanConfig = JSON.parse(JSON.stringify(currentConfig, (key, value) => {
     if (key.startsWith('_')) return undefined;
@@ -615,26 +637,221 @@ window.APP_CONFIG = {
 `;
 }
 
-document.getElementById('btn-generate').addEventListener('click', () => {
-  document.getElementById('export-code').value = generateConfigCode();
+async function fetchBaseIndexHtml() {
+  // Try fetching from github if credentials are present
+  const username = ghUsernameInput?.value?.trim();
+  const repo = ghRepoInput?.value?.trim();
+  const token = ghTokenInput?.value?.trim();
+
+  if (username && repo) {
+    try {
+      const url = `https://api.github.com/repos/${username}/${repo}/contents/index.html`;
+      const headers = { 'Accept': 'application/vnd.github.v3.raw' };
+      if (token) headers['Authorization'] = `token ${token}`;
+      const res = await fetch(url, { headers });
+      if (res.ok) {
+        return await res.text();
+      }
+    } catch(e) {
+      console.warn("Failed to fetch template from GitHub. Falling back to local file.", e);
+    }
+  }
+
+  // Fallback to local fetch
+  try {
+    const res = await fetch('index.html');
+    if (res.ok) {
+      return await res.text();
+    }
+  } catch(e) {
+    console.warn("Failed to fetch local index.html.", e);
+  }
+
+  throw new Error("Could not fetch base index.html template.");
+}
+
+function generateSitemapXml() {
+  const config = currentConfig;
+  const siteUrl = config.seo?.siteUrl || 'https://beacon.shazee.dev';
+  const lastMod = new Date().toISOString().split('T')[0];
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${siteUrl}/</loc>
+    <lastmod>${lastMod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+}
+
+async function generateIndexHtml() {
+  const config = currentConfig;
+  const profileName = config.profile?.name || 'Beacon';
+  const profileTitle = config.profile?.title || 'Link-in-Bio';
+  const profileBio = config.profile?.bio || '';
+  const isBeaconBrand = profileName.toLowerCase().includes('beacon');
+  
+  const seo = config.seo || {};
+  const seoTitle = seo.pageTitle || (isBeaconBrand ? `${profileName} • ${profileTitle}` : `${profileName} • ${profileTitle} | Beacon`);
+  const metaDesc = seo.metaDescription || (profileBio ? `${profileName} - ${profileTitle}. ${profileBio} - Find all links, socials, and projects in one place.` : `${profileName} - ${profileTitle}. Find all links, socials, and projects in one place.`);
+  const siteUrl = seo.siteUrl || 'https://beacon.shazee.dev';
+  const ogImage = seo.ogImage || (config.profile?.avatar && config.profile.avatar.length > 1 ? config.profile.avatar : '');
+  const keywords = seo.keywords || 'bio link, linktree alternative, open source link in bio, free linktree alternative, self hosted bio link, static bio link, developer portfolio, link in bio template, zero database bio link';
+  const language = seo.language || 'en';
+  
+  // Theme Color
+  let themeColor = seo.themeColor || '#222222';
+  if (!seo.themeColor && config.theme?.preset === 'custom' && config.theme?.customColors?.primary) {
+      themeColor = config.theme.customColors.primary;
+  }
+
+  // Schema Generation
+  const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
+  
+  const itemElements = (config.links || []).map((link, idx) => ({
+    "@type": "SiteNavigationElement",
+    "position": idx + 1,
+    "name": link.label,
+    "url": link.url || siteUrl
+  }));
+
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfilePage",
+        "dateModified": new Date().toISOString().split('T')[0],
+        "mainEntity": {
+          "@type": "Person",
+          "name": profileName,
+          "jobTitle": profileTitle,
+          "description": profileBio,
+          "url": siteUrl,
+          "sameAs": sameAsLinks
+        }
+      },
+      {
+        "@type": "ItemList",
+        "name": `${profileName} Links`,
+        "itemListElement": itemElements
+      }
+    ]
+  };
+  if (ogImage) schemaData["@graph"][0].mainEntity.image = ogImage;
+
+  const baseHtml = await fetchBaseIndexHtml();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(baseHtml, 'text/html');
+
+  doc.documentElement.lang = language;
+  
+  const setMeta = (attr, attrValue, content) => {
+    if (!content) return;
+    let el = doc.querySelector(`meta[${attr}="${attrValue}"]`);
+    if (!el) {
+      el = doc.createElement('meta');
+      el.setAttribute(attr, attrValue);
+      doc.head.appendChild(el);
+    }
+    el.setAttribute('content', content);
+  };
+
+  doc.title = seoTitle;
+  setMeta('name', 'description', metaDesc);
+  setMeta('name', 'keywords', keywords);
+  setMeta('name', 'author', profileName);
+  setMeta('name', 'theme-color', themeColor);
+  
+  let canonical = doc.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.setAttribute('href', siteUrl);
+
+  setMeta('property', 'og:type', 'profile');
+  setMeta('property', 'og:url', siteUrl);
+  setMeta('property', 'og:title', seoTitle);
+  setMeta('property', 'og:description', metaDesc);
+  setMeta('property', 'og:site_name', profileName);
+  if (ogImage) {
+    setMeta('property', 'og:image', ogImage);
+    setMeta('property', 'og:image:type', 'image/png');
+  }
+
+  setMeta('name', 'twitter:card', 'summary_large_image');
+  if (seo.twitterHandle) setMeta('name', 'twitter:site', seo.twitterHandle);
+  setMeta('name', 'twitter:title', seoTitle);
+  setMeta('name', 'twitter:description', metaDesc);
+  if (ogImage) setMeta('name', 'twitter:image', ogImage);
+
+  let jsonLd = doc.querySelector('script[type="application/ld+json"]');
+  if (jsonLd) {
+    jsonLd.textContent = '\n  ' + JSON.stringify(schemaData, null, 2) + '\n  ';
+  }
+
+  const noscript = doc.querySelector('noscript');
+  if (noscript) {
+    noscript.innerHTML = `
+    <div class="container py-5 text-center">
+      <h1>${profileName}</h1>
+      <p class="lead">${profileTitle}</p>
+      <p>${profileBio}</p>
+      <hr style="max-width: 400px; margin: 2rem auto;">
+      <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        ${(config.socials || []).map(s => `<li><a href="${s.url}">${s.label}</a></li>`).join('\n        ')}
+      </ul>
+    </div>
+  `;
+  }
+
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+}
+
+document.getElementById('btn-generate').addEventListener('click', async () => {
+  document.getElementById('export-areas').style.display = 'block';
+  document.getElementById('export-code-config').value = generateConfigCode();
+  document.getElementById('export-code-index').value = await generateIndexHtml();
+  document.getElementById('export-code-sitemap').value = generateSitemapXml();
 });
 
-document.getElementById('btn-copy').addEventListener('click', () => {
-  const codeEl = document.getElementById('export-code');
+function handleCopy(textAreaId, btnId) {
+  const codeEl = document.getElementById(textAreaId);
   if (!codeEl.value) {
     alert("Please generate the code first!");
     return;
   }
-
   navigator.clipboard.writeText(codeEl.value).then(() => {
-    const btn = document.getElementById('btn-copy');
+    const btn = document.getElementById(btnId);
     const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="material-symbols-outlined">check</span> Copied!`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 16px;">check</span> Copied!`;
     setTimeout(() => btn.innerHTML = originalText, 2000);
   }).catch(err => {
     alert("Failed to copy. Please select all and copy manually.");
   });
-});
+}
+
+function handleDownload(textAreaId, filename) {
+  const codeEl = document.getElementById(textAreaId);
+  if (!codeEl.value) {
+    alert("Please generate the code first!");
+    return;
+  }
+  const blob = new Blob([codeEl.value], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btn-copy-config').addEventListener('click', () => handleCopy('export-code-config', 'btn-copy-config'));
+document.getElementById('btn-copy-index').addEventListener('click', () => handleCopy('export-code-index', 'btn-copy-index'));
+document.getElementById('btn-copy-sitemap').addEventListener('click', () => handleCopy('export-code-sitemap', 'btn-copy-sitemap'));
+document.getElementById('btn-download-config').addEventListener('click', () => handleDownload('export-code-config', 'config.js'));
+document.getElementById('btn-download-index').addEventListener('click', () => handleDownload('export-code-index', 'index.html'));
+document.getElementById('btn-download-sitemap').addEventListener('click', () => handleDownload('export-code-sitemap', 'sitemap.xml'));
 
 // --- GitHub Deployment ---
 const ghUsernameInput = document.getElementById('gh-username');
@@ -678,70 +895,115 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
   statusEl.textContent = 'Preparing configuration...';
   statusEl.style.color = 'var(--text-main)';
 
-  const code = generateConfigCode();
-
   try {
-    statusEl.textContent = 'Fetching current file status...';
+    const codeConfig = generateConfigCode();
+    const codeIndexHtml = await generateIndexHtml();
+    const codeSitemapXml = generateSitemapXml();
 
-    // 1. Get the current file's SHA (required to update it)
-    const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
-    const getRes = await fetch(fileUrl, {
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+    statusEl.textContent = 'Preparing atomic commit...';
+    
+    // 1. Get current commit reference
+    const refUrl = `https://api.github.com/repos/${username}/${repo}/git/refs/heads/main`;
+    let refRes = await fetch(refUrl, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
     });
-
-    let sha = null;
-    if (getRes.ok) {
-      const data = await getRes.json();
-      sha = data.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error('Failed to fetch current file. Check your credentials and repo name.');
+    if (!refRes.ok) {
+      refRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/refs/heads/master`, {
+        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+      });
+      if (!refRes.ok) throw new Error('Failed to fetch repository branch (tried main and master).');
     }
+    const refData = await refRes.json();
+    const currentSha = refData.object.sha;
+    const branchName = refData.ref.replace('refs/', '');
 
-    statusEl.textContent = 'Pushing update to GitHub...';
+    // 2. Get current tree
+    const commitRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits/${currentSha}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    const commitData = await commitRes.json();
+    const baseTreeSha = commitData.tree.sha;
 
-    // 2. Update the file
-    const putRes = await fetch(fileUrl, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
+    statusEl.textContent = 'Creating git blobs...';
+    
+    const createBlob = async (content) => {
+      const res = await fetch(`https://api.github.com/repos/${username}/${repo}/git/blobs`, {
+        method: 'POST',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content, encoding: 'utf-8' })
+      });
+      if (!res.ok) throw new Error('Failed to create git blob.');
+      const data = await res.json();
+      return data.sha;
+    };
+
+    const configBlobSha = await createBlob(codeConfig);
+    const indexBlobSha = await createBlob(codeIndexHtml);
+    const sitemapBlobSha = await createBlob(codeSitemapXml);
+
+    statusEl.textContent = 'Committing changes...';
+
+    // 3. Create new tree
+    const treeRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/trees`, {
+      method: 'POST',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Update config.js via Bio Link Editor',
-        content: btoa(unescape(encodeURIComponent(code))), // Base64 encode the content safely
-        sha: sha
+        base_tree: baseTreeSha,
+        tree: [
+          { path: 'config.js', mode: '100644', type: 'blob', sha: configBlobSha },
+          { path: 'index.html', mode: '100644', type: 'blob', sha: indexBlobSha },
+          { path: 'sitemap.xml', mode: '100644', type: 'blob', sha: sitemapBlobSha }
+        ]
       })
     });
+    if (!treeRes.ok) throw new Error('Failed to create git tree.');
+    const treeData = await treeRes.json();
+    const newTreeSha = treeData.sha;
 
-    if (putRes.ok) {
-      statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
-      statusEl.style.color = '#388e3c'; // Green
+    // 4. Create commit
+    const newCommitRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/commits`, {
+      method: 'POST',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: 'Publish update via Bio Link Editor',
+        tree: newTreeSha,
+        parents: [currentSha]
+      })
+    });
+    if (!newCommitRes.ok) throw new Error('Failed to create git commit.');
+    const newCommitData = await newCommitRes.json();
+    const newCommitSha = newCommitData.sha;
 
-      // Clear draft after successful deploy
-      localStorage.removeItem(DRAFT_KEY);
-      lastSavedStr = JSON.stringify(currentConfig);
+    // 5. Update reference
+    statusEl.textContent = 'Pushing commit to GitHub...';
+    const updateRefRes = await fetch(`https://api.github.com/repos/${username}/${repo}/git/${branchName}`, {
+      method: 'PATCH',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sha: newCommitSha })
+    });
+    if (!updateRefRes.ok) throw new Error('Failed to update branch reference.');
 
-      const discardBtn = document.getElementById('btn-discard-draft-top');
-      if (discardBtn) discardBtn.style.display = 'none';
+    // ---- Success ----
+    statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
+    statusEl.style.color = '#388e3c'; // Green
 
-      const warningBanner = document.getElementById('draft-warning-banner');
-      if (warningBanner) warningBanner.style.display = 'none';
+    // Clear draft after successful deploy
+    localStorage.removeItem(DRAFT_KEY);
+    lastSavedStr = JSON.stringify(currentConfig);
 
-      const statusIndicator = document.getElementById('draft-status-indicator');
-      if (statusIndicator) {
-        statusIndicator.className = 'draft-status-pill saved';
-        statusIndicator.innerHTML = `
-          <span class="material-symbols-outlined status-icon">check_circle</span>
-          <span class="status-text">Saved</span>
-        `;
-      }
-    } else {
-      const errorData = await putRes.json();
-      throw new Error(errorData.message || 'Failed to update file.');
+    const discardBtn = document.getElementById('btn-discard-draft-top');
+    if (discardBtn) discardBtn.style.display = 'none';
+
+    const warningBanner = document.getElementById('draft-warning-banner');
+    if (warningBanner) warningBanner.style.display = 'none';
+
+    const statusIndicator = document.getElementById('draft-status-indicator');
+    if (statusIndicator) {
+      statusIndicator.className = 'draft-status-pill saved';
+      statusIndicator.innerHTML = `
+        <span class="material-symbols-outlined status-icon">check_circle</span>
+        <span class="status-text">Saved</span>
+      `;
     }
   } catch (error) {
     console.error(error);

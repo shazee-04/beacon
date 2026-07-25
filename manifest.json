@@ -1,0 +1,17 @@
+{
+  "name": "Beacon — Link in Bio",
+  "short_name": "Beacon",
+  "description": "A free, open-source, zero-database Linktree alternative.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBFF",
+  "theme_color": "#4B47B7",
+  "icons": [
+    {
+      "src": "assets/icons/Beacon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

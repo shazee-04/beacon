@@ -10,7 +10,8 @@ Beacon is a premium Linktree alternative that runs entirely client-side. Edit a 
 - Stack: HTML, CSS, vanilla JavaScript (no frameworks, no build tools)
 - Database: None required (zero-database architecture)
 - Hosting: GitHub Pages, Vercel, Netlify (one-click deploy)
-- Admin: Built-in visual editor with live preview and GitHub API integration
+- Admin: Built-in visual editor with live phone simulator, DOM-based static index.html generator, and GitHub API integration
+- SEO & AI: JSON-LD schemas (ProfilePage, Person, ItemList), static meta tags, automated sitemap.xml generator
 
 ## Links
 - Live Demo: https://beacon.shazee.dev
@@ -23,7 +24,9 @@ Beacon is a premium Linktree alternative that runs entirely client-side. Edit a 
 - Collapsible sublinks, expandable card grids, video/audio embeds
 - Banner link tiles, custom HTML/CSS/JS injection
 - Drag-and-drop visual editor with real-time phone simulator preview
-- Direct GitHub deployment from the editor (PAT-based)
+- Atomic GitHub deployment from the editor pushing config.js, index.html, and sitemap.xml in a single commit
+- Advanced SEO controls (Page Title, Meta Description, Language, Theme Color, Open Graph & Twitter cards)
+- Separate manual export for config.js, index.html, and sitemap.xml
 - Respects prefers-reduced-motion for accessibility
 
 ## Use Cases

@@ -9,8 +9,9 @@ This guide provides a comprehensive overview of the **Beacon** architecture, all
 2. [Visual Admin Dashboard (edit.html)](#visual-admin-dashboard-edithtml)
 3. [Supported Link Types & Component Schemas](#supported-link-types--component-schemas)
 4. [Theme & Aesthetic Customization](#theme--aesthetic-customization)
-5. [Export & Deployment Options](#export--deployment-options)
-6. [Local Development Guide](#local-development-guide)
+5. [SEO & Metadata Customization](#seo--metadata-customization)
+6. [Export & Deployment Options](#export--deployment-options)
+7. [Local Development Guide](#local-development-guide)
 
 ---
 
@@ -24,18 +25,30 @@ graph TD
     A --> C[script.js / edit.js]
     C --> D[Bootstrap 5 / CSS Custom Variables]
     A --> E[LocalStorage Drafts]
-    C --> F[GitHub REST API via PAT]
+    C --> F[GitHub Git Data API via PAT]
+    F --> G[Atomic Commit: config.js + index.html + sitemap.xml]
 ```
 
 - **Static Front-end**: Uses HTML5, vanilla JS, and CSS custom variables.
-- **Configuration-Driven**: All data resides in `config.js` under the global `window.APP_CONFIG` object.
-- **Serverless Editing & Storage**: The Admin Dashboard ([edit.html](edit.html)) writes changes to your local browser's `localStorage` as drafts, compiles valid configuration code, and pushes updates directly back to your GitHub repository using the GitHub API.
+- **Configuration & Pre-rendered SEO**: Data resides in `config.js`, while static SEO tags, JSON-LD schemas, and `<noscript>` fallbacks are pre-rendered into `index.html` alongside `sitemap.xml`.
+- **Serverless Editing & Storage**: The Admin Dashboard ([edit.html](edit.html)) writes changes to your browser's `localStorage` as drafts, compiles valid configuration code & HTML, and pushes updates directly back to your GitHub repository using the GitHub Git Data API in a single atomic commit.
 
 ---
 
 ## Visual Admin Dashboard (`edit.html`)
 
-The visual dashboard provides a modern editing experience without requiring command-line or code editing tools:
+### Sidebar Navigation Structure
+The Admin Dashboard features an organized sidebar workspace ordered as:
+1. **Profile**: Edit username, name, title, bio, and avatar.
+2. **Skills**: Manage skill badges with Material icons.
+3. **Socials**: Manage social links with custom icons.
+4. **CTA**: Configure prominent call-to-action buttons.
+5. **Featured**: Highlight projects, apps, or case studies.
+6. **Links**: Build main vertical link tiles (sublinks, cards, embeds, custom code).
+7. **Theme**: Choose presets or build custom HSL/Hex color palettes.
+8. **SEO**: Customize canonical URL, Page Title, Meta Description, Language, Theme Color, and Open Graph share tags.
+9. **Settings**: Store GitHub PAT credentials securely in local storage.
+10. **Save & Deploy**: Atomic GitHub deployment and manual export textareas.
 
 ### Features & Capabilities
 
@@ -47,9 +60,10 @@ The visual dashboard provides a modern editing experience without requiring comm
    - A visible "Discard Changes" button and "Unsaved Local Draft" warning banner appear to prevent loss of work.
 3. **Interactive Sortable Lists**:
    - Powered by **SortableJS**, allowing drag-and-drop reordering of skills, links, socials, featured projects, and CTAs.
-4. **Direct GitHub API Integration**:
+4. **Atomic GitHub API Integration (Git Trees API)**:
    - Saves your Personal Access Token (PAT) securely inside your browser's local storage.
-   - Performs file uploads (e.g., uploading custom PNG or SVG avatars) directly to the repository and updates your `config.js` file commits in place.
+   - Performs file uploads (e.g., uploading custom PNG or SVG avatars) directly to the repository.
+   - Commits `config.js`, `index.html`, and `sitemap.xml` together in a single atomic git commit via GitHub Git Data API.
 
 ---
 
@@ -210,26 +224,39 @@ theme: {
 
 ## SEO & Metadata Customization
 
-Beacon automatically optimizes your bio link for search engines and AI agents (ChatGPT, Perplexity, Claude) by injecting dynamic meta tags, Open Graph data, and JSON-LD structured data.
+Beacon automatically optimizes your bio link for search engines and AI agents (ChatGPT, Perplexity, Claude, Gemini) by injecting static meta tags, Open Graph data, JSON-LD structured data, and `<noscript>` fallbacks into `index.html`.
 
-### Smart Defaults
-By default, Beacon automatically generates:
-- **Title and Description**: Using your `profile.name`, `profile.title`, and `profile.bio`.
-- **JSON-LD Schema**: Automatically generates `Person` and `ProfilePage` schema to help search engines understand your identity and social links.
+### Dynamic Template Parsing (`DOMParser`)
+When generating or deploying `index.html`, the editor fetches the latest `index.html` structure (from GitHub API or local origin) and dynamically parses it using `DOMParser`. It updates metadata tags, canonical links, `<noscript>` fallbacks, and JSON-LD schema while preserving all existing HTML layout structure.
+
+### Rich JSON-LD Structured Data
+Beacon generates a unified JSON-LD graph:
+- **`ProfilePage` & `Person`**: Includes name, job title, bio, canonical URL, avatar image, and `sameAs` array containing all social profile links.
+- **`ItemList` & `SiteNavigationElement`**: Iterates over all active links, allowing search engines and AI answer engines to index individual navigation destinations directly.
 
 ### Advanced SEO Configuration
-For complete control, you can define an `seo` block in your `config.js`:
+You can configure SEO metadata visually in the **SEO Tab** of the Visual Editor (`edit.html`), or manually by defining an `seo` block in `config.js`:
 
 ```javascript
 seo: {
-  siteUrl: "https://yourdomain.com",       // Your canonical URL (important for SEO)
-  ogImage: "assets/preview.png",           // Open Graph share image for social media
-  twitterHandle: "@your_handle",           // Twitter/X handle for cards
-  keywords: "bio link, portfolio, developer" // Custom meta keywords
+  siteUrl: "https://yourdomain.com",         // Canonical URL (used in sitemap.xml & og:url)
+  pageTitle: "Custom Title | Portfolio",    // Page <title> & og:title override
+  metaDescription: "Custom SEO description", // Meta description override
+  language: "en",                            // HTML lang attribute
+  themeColor: "#222222",                     // Theme color meta tag
+  ogImage: "assets/preview.png",             // Open Graph share image
+  twitterHandle: "@your_handle",             // Twitter/X handle for cards
+  keywords: "bio link, portfolio, developer"  // Meta keywords
 }
 ```
 
-If any of these values are missing, Beacon intelligently falls back to your profile data and avatar.
+If any of these values are omitted, Beacon intelligently falls back to your profile data and avatar.
+
+### Progressive Web App (PWA) Support
+Beacon includes a standard PWA manifest (`manifest.json`) linked inside `<head>` with icon declarations, theme colors, and standalone display mode settings so users can add your bio link directly to their mobile home screen.
+
+### Automated Sitemap Generation
+The editor automatically generates a valid `sitemap.xml` file aligned with your `siteUrl` property during export and atomic GitHub deployment.
 
 ---
 
@@ -237,18 +264,21 @@ If any of these values are missing, Beacon intelligently falls back to your prof
 
 Beacon provides three deployment strategies:
 
-### Option 1: Automated Deploy via Editor (Recommended)
+### Option 1: Atomic Deploy via Editor (Recommended)
 1. Launch [edit.html](edit.html).
 2. Click **Settings** and input:
    - **GitHub Username** (e.g. `shazee-04`)
    - **Repository Name** (e.g. `beacon`)
    - **Personal Access Token** (requires `repo` write scope)
-3. Navigate to **Save & Deploy** (Export tab) and click **Deploy to GitHub**. This commits the configuration changes directly to your repository, triggering the deployment action workflow.
+3. Navigate to **Save & Deploy** (Export tab) and click **Deploy to GitHub**. This packages `config.js`, `index.html`, and `sitemap.xml` into a single atomic commit via GitHub Git Data API, triggering GitHub Pages deployment.
 
-### Option 2: Manual Config Export
+### Option 2: Manual Export
 1. In the Visual Editor, go to the **Save & Deploy** tab.
 2. Under **Manual Export**, click **Generate Code**.
-3. Copy the compiled block and paste it directly into your project's local [config.js](config.js).
+3. Use the separate textareas and individual **Copy** / **Download** buttons for:
+   - `config.js`
+   - `index.html`
+   - `sitemap.xml`
 
 ### Option 3: Standard GitHub Pages Action
 Every push to the default branch triggers the `.github/workflows/static.yml` GitHub Pages deployment workflow. Your site compiles and hosts automatically at `https://<username>.github.io/<repo-name>`.

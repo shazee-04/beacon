@@ -8,18 +8,22 @@ window.APP_CONFIG = {
   // Profile settings
   profile: {
     name: "Beacon",
-    title: "Premium Link-in-Bio Template",
+    title: "Free Linktree Alternative",
     bio: "A lightning-fast, configuration-driven personal link directory featuring rich micro-interactions and an ambient animated mesh background.",
     avatar: "assets/icons/Beacon.png",
-    username: "shazee-04/beacon"
+    username: "beacon"
   },
 
   // SEO settings (Smart defaults are used if omitted)
   seo: {
     siteUrl: "https://beacon.shazee.dev",          // Your canonical URL (important for SEO)
-    ogImage: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/admin-ui-beacon.png", // Open Graph share image
+    ogImage: "https://beacon.shazee.dev/assets/icons/Beacon.png", // Open Graph share image
     twitterHandle: "@shazee_04",                 // Twitter/X handle
-    keywords: "bio link, linktree alternative, open source, self-hosted"
+    keywords: "bio link, linktree alternative, open source link in bio, free linktree alternative, self hosted bio link, static bio link, developer portfolio, link in bio template, zero database bio link",
+    pageTitle: "",        // Custom <title> override
+    metaDescription: "",  // Custom meta description override
+    language: "en",       // HTML lang attribute
+    themeColor: ""        // <meta name="theme-color"> value
   },
 
   // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'cyberpunk-neon', 'abyss-slate', 'forest-shadow', 'custom')
