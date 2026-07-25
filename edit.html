@@ -132,6 +132,63 @@
           <textarea id="seo-keywords" rows="2" placeholder="bio link, portfolio, linktree alternative"></textarea>
           <small style="color:var(--text-muted); font-size:12px;">Comma-separated keywords for search engine indexing.</small>
         </div>
+
+        <!-- Advanced SEO (Collapsible) -->
+        <div class="form-group mt-4">
+          <div class="list-item-header collapsed" onclick="toggleCollapse(this, 'ui', 'advanced-seo')" style="cursor:pointer; background:var(--surface); border:1px solid var(--border); padding:12px 16px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h4 style="margin:0; font-size:14px; font-weight:600;">Advanced SEO Options</h4>
+              <small style="color:var(--text-muted); font-size:12px;">Leave blank to auto-generate from your profile data.</small>
+            </div>
+            <span class="material-symbols-outlined expand-icon">expand_more</span>
+          </div>
+          <div class="list-item-body collapsed" id="advanced-seo-body" style="border:1px solid var(--border); border-top:none; border-radius:0 0 8px 8px; padding:16px;">
+            <div class="form-group">
+              <label>Page Title Override</label>
+              <input type="text" id="seo-page-title" placeholder="e.g. My Custom Title | Link in Bio">
+              <small style="color:var(--text-muted); font-size:12px;">Overrides the auto-generated &lt;title&gt; tag.</small>
+            </div>
+            <div class="form-group">
+              <label>Meta Description Override</label>
+              <textarea id="seo-meta-desc" rows="2" placeholder="Custom description for search results..."></textarea>
+              <small style="color:var(--text-muted); font-size:12px;">Overrides the auto-generated description derived from your bio.</small>
+            </div>
+            <div class="grid-2">
+              <div class="form-group mb-0">
+                <label>Language</label>
+                <select id="seo-language">
+                  <option value="en">English (en)</option>
+                  <option value="es">Spanish (es)</option>
+                  <option value="fr">French (fr)</option>
+                  <option value="de">German (de)</option>
+                  <option value="ja">Japanese (ja)</option>
+                  <option value="zh">Chinese (zh)</option>
+                  <option value="hi">Hindi (hi)</option>
+                  <option value="ar">Arabic (ar)</option>
+                  <option value="pt">Portuguese (pt)</option>
+                  <option value="ru">Russian (ru)</option>
+                  <option value="ko">Korean (ko)</option>
+                  <option value="it">Italian (it)</option>
+                  <option value="nl">Dutch (nl)</option>
+                  <option value="tr">Turkish (tr)</option>
+                  <option value="pl">Polish (pl)</option>
+                  <option value="id">Indonesian (id)</option>
+                  <option value="th">Thai (th)</option>
+                  <option value="vi">Vietnamese (vi)</option>
+                </select>
+                <small style="color:var(--text-muted); font-size:12px;">HTML lang attribute.</small>
+              </div>
+              <div class="form-group mb-0">
+                <label>Theme Color Override</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="color" id="seo-theme-color-picker" style="width: 42px; height: 42px; padding: 0; border: 1px solid var(--border); border-radius: 4px; cursor: pointer;">
+                  <input type="text" id="seo-theme-color" style="flex: 1;" placeholder="e.g. #222222">
+                </div>
+                <small style="color:var(--text-muted); font-size:12px;">Mobile browser tab color. Defaults to theme primary.</small>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Theme Tab -->
@@ -313,17 +370,37 @@
 
         <header class="pane-header" style="border-top: 1px solid var(--border); padding-top: 32px;">
           <h3>Manual Export</h3>
-          <p>Copy this code and replace the contents of your <code>config.js</code> file.</p>
+          <p>Generate both configuration and the main HTML file. Download and replace them in your repository.</p>
         </header>
         <div class="export-actions mb-3">
           <button class="btn btn-primary" id="btn-generate">
             <span class="material-symbols-outlined">sync</span> Generate Code
           </button>
-          <button class="btn btn-secondary" id="btn-copy">
-            <span class="material-symbols-outlined">content_copy</span> Copy to Clipboard
-          </button>
         </div>
-        <textarea id="export-code" class="code-area" readonly placeholder="Your generated config will appear here..."></textarea>
+
+        <div id="export-areas" style="display:none;">
+          <h4 style="font-size: 14px; margin-bottom: 8px;">1. config.js</h4>
+          <div class="export-actions mb-2" style="justify-content: flex-start; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-copy-config">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span> Copy
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-download-config">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Download config.js
+            </button>
+          </div>
+          <textarea id="export-code-config" class="code-area mb-4" readonly placeholder="Your generated config.js will appear here..."></textarea>
+
+          <h4 style="font-size: 14px; margin-bottom: 8px;">2. index.html (SEO Optimized)</h4>
+          <div class="export-actions mb-2" style="justify-content: flex-start; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" id="btn-copy-index">
+              <span class="material-symbols-outlined" style="font-size: 16px;">content_copy</span> Copy
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-download-index">
+              <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Download index.html
+            </button>
+          </div>
+          <textarea id="export-code-index" class="code-area" readonly placeholder="Your generated index.html will appear here..."></textarea>
+        </div>
       </div>
 
       <!-- Settings Tab -->

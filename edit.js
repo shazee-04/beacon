@@ -73,6 +73,21 @@ bindInput('seo-site-url', currentConfig.seo, 'siteUrl');
 bindInput('seo-og-image', currentConfig.seo, 'ogImage');
 bindInput('seo-twitter-handle', currentConfig.seo, 'twitterHandle');
 bindInput('seo-keywords', currentConfig.seo, 'keywords');
+bindInput('seo-page-title', currentConfig.seo, 'pageTitle');
+bindInput('seo-meta-desc', currentConfig.seo, 'metaDescription');
+bindInput('seo-language', currentConfig.seo, 'language');
+bindInput('seo-theme-color', currentConfig.seo, 'themeColor');
+
+// Handle Theme Color Sync
+const themeColorPicker = document.getElementById('seo-theme-color-picker');
+const themeColorText = document.getElementById('seo-theme-color');
+if (themeColorPicker && themeColorText) {
+  themeColorPicker.value = currentConfig.seo.themeColor || '#222222';
+  themeColorPicker.addEventListener('input', (e) => {
+    currentConfig.seo.themeColor = e.target.value;
+    themeColorText.value = e.target.value;
+  });
+}
 
 // Set Favicon on load
 if (currentConfig.profile && currentConfig.profile.avatar) {
@@ -573,7 +588,7 @@ document.getElementById('add-link').addEventListener('click', () => {
 });
 
 
-// --- Export Configuration ---
+// --- Export Configuration & HTML ---
 function generateConfigCode() {
   const cleanConfig = JSON.parse(JSON.stringify(currentConfig, (key, value) => {
     if (key.startsWith('_')) return undefined;
@@ -622,26 +637,269 @@ window.APP_CONFIG = {
 `;
 }
 
+function generateIndexHtml() {
+  const config = currentConfig;
+  const profileName = config.profile?.name || 'Beacon';
+  const profileTitle = config.profile?.title || 'Link-in-Bio';
+  const profileBio = config.profile?.bio || '';
+  const isBeaconBrand = profileName.toLowerCase().includes('beacon');
+  
+  const seo = config.seo || {};
+  const seoTitle = seo.pageTitle || (isBeaconBrand ? `${profileName} • ${profileTitle}` : `${profileName} • ${profileTitle} | Beacon`);
+  const metaDesc = seo.metaDescription || (profileBio ? `${profileName} - ${profileTitle}. ${profileBio} - Find all links, socials, and projects in one place.` : `${profileName} - ${profileTitle}. Find all links, socials, and projects in one place.`);
+  const siteUrl = seo.siteUrl || 'https://beacon.shazee.dev';
+  const ogImage = seo.ogImage || (config.profile?.avatar && config.profile.avatar.length > 1 ? config.profile.avatar : '');
+  const keywords = seo.keywords || 'bio link, linktree alternative, open source link in bio, free linktree alternative, self hosted bio link, static bio link, developer portfolio, link in bio template, zero database bio link';
+  const language = seo.language || 'en';
+  
+  // Theme Color
+  let themeColor = seo.themeColor || '#222222';
+  if (!seo.themeColor && config.theme?.preset === 'custom' && config.theme?.customColors?.primary) {
+      themeColor = config.theme.customColors.primary;
+  }
+
+  // Schema Generation
+  const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "ProfilePage",
+        "dateModified": new Date().toISOString().split('T')[0],
+        "mainEntity": {
+          "@type": "Person",
+          "name": profileName,
+          "jobTitle": profileTitle,
+          "description": profileBio,
+          "url": siteUrl,
+          "sameAs": sameAsLinks
+        }
+      }
+    ]
+  };
+  if (ogImage) schemaData["@graph"][0].mainEntity.image = ogImage;
+
+  return `<!DOCTYPE html>
+<html lang="${language}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${seoTitle}</title>
+  <meta name="description" content="${metaDesc}">
+  <meta name="keywords" content="${keywords}">
+  <meta name="author" content="${profileName}">
+  <meta name="generator" content="Beacon Link-in-Bio">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <link rel="canonical" href="${siteUrl}">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="profile">
+  <meta property="og:url" content="${siteUrl}">
+  <meta property="og:title" content="${seoTitle}">
+  <meta property="og:description" content="${metaDesc}">
+  ${ogImage ? `<meta property="og:image" content="${ogImage}">\n  <meta property="og:image:type" content="image/png">` : ''}
+  <meta property="og:site_name" content="${profileName}">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  ${seo.twitterHandle ? `<meta name="twitter:site" content="${seo.twitterHandle}">` : ''}
+  <meta name="twitter:title" content="${seoTitle}">
+  <meta name="twitter:description" content="${metaDesc}">
+  ${ogImage ? `<meta name="twitter:image" content="${ogImage}">` : ''}
+
+  <meta name="theme-color" content="${themeColor}">
+  <link rel="apple-touch-icon" href="assets/icons/Beacon.png">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Static Structured Data (JSON-LD) for Search Engines & AI Crawlers -->
+  <script type="application/ld+json">
+  ${JSON.stringify(schemaData, null, 2)}
+  </script>
+
+  <link rel="icon" href="assets/icons/beacon.png" type="image/x-icon">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Material Symbols Outlined -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Global configuration data -->
+  <script src="config.js"></script>
+</head>
+
+<body>
+  <!-- Ambient background -->
+  <div class="bg-mesh" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Fallback for non-JS crawlers (AI bots, search spiders) -->
+  <noscript>
+    <div class="container py-5 text-center">
+      <h1>${profileName}</h1>
+      <p class="lead">${profileTitle}</p>
+      <p>${profileBio}</p>
+      <hr style="max-width: 400px; margin: 2rem auto;">
+      <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        ${(config.socials || []).map(s => `<li><a href="${s.url}">${s.label}</a></li>`).join('\\n        ')}
+      </ul>
+    </div>
+  </noscript>
+
+  <main class="container py-5">
+    <div class="layout-grid">
+      <!-- Sidebar Column (Profile Card + Footer) -->
+      <div class="sidebar-column">
+        <!-- ═══ Employee ID Badge Card ═══ -->
+        <section class="badge-card card border-0 shadow-sm rounded-5" aria-label="Profile">
+          <!-- Badge surface -->
+          <div class="badge-surface p-4 text-center">
+            <!-- Photo / Avatar area -->
+            <div class="badge-photo-area mb-3 d-flex justify-content-center">
+              <div class="badge-photo d-flex align-items-center justify-content-center shadow-sm" id="profile-avatar-container">
+                <!-- Populate dynamically -->
+              </div>
+            </div>
+
+            <!-- Identity info -->
+            <div class="badge-identity mb-3" id="profile-identity-container">
+              <!-- Populate dynamically -->
+            </div>
+
+            <!-- Skill chips -->
+            <div class="badge-chips d-flex justify-content-center flex-wrap gap-2 mb-4" id="profile-skills-container">
+              <!-- Populate dynamically -->
+            </div>
+
+            <hr class="my-3 text-secondary-emphasis opacity-25">
+
+            <!-- Social icons row -->
+            <nav class="badge-socials d-flex justify-content-center gap-2 mb-4" aria-label="Social media profiles" id="profile-socials-container">
+              <!-- Populate dynamically -->
+            </nav>
+
+            <hr class="my-3 text-secondary-emphasis opacity-25">
+
+            <!-- CTA button -->
+            <div class="badge-cta" id="profile-cta-container">
+              <!-- Populate dynamically -->
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer text-center mt-auto py-4" id="footer-container">
+          <!-- Populate dynamically -->
+        </footer>
+      </div>
+
+      <!-- Content Column -->
+      <div class="content-column">
+        <!-- Featured items container -->
+        <section id="featured-container" class="mb-3" style="display: none;">
+          <!-- Populate dynamically -->
+        </section>
+
+        <!-- Links list -->
+        <nav class="links-list" aria-label="All links" id="links-list-container">
+          <!-- Populate dynamically -->
+        </nav>
+      </div>
+    </div>
+  </main>
+
+  <!-- Promo Toast Popup -->
+  <div id="promo-popup-wrapper" class="promo-popup-wrapper" aria-hidden="true">
+    <div id="promo-popup" class="promo-popup">
+      <div class="promo-content">
+        <div class="promo-header">
+          <div class="d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined promo-icon">auto_awesome</span>
+            <span class="promo-badge">Free & Open Source</span>
+          </div>
+          <button id="promo-close" class="promo-close-btn" aria-label="Dismiss invite">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <h5 class="promo-title">Create your own bio link</h5>
+        <p class="promo-text">Clone this <strong>free & open-source</strong> template. Fully customizable, interactive, and perfect for <strong>privacy</strong> and <strong>self-hosting</strong> in minutes.</p>
+        <div class="promo-actions">
+          <a href="https://github.com/shazee-04/beacon" target="_blank" rel="noopener" class="btn btn-promo w-100 rounded-pill py-2 px-3 d-inline-flex align-items-center justify-content-center gap-1">
+            Build For Free
+            <span class="material-icons fs-6">favorite</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>`;
+}
+
 document.getElementById('btn-generate').addEventListener('click', () => {
-  document.getElementById('export-code').value = generateConfigCode();
+  document.getElementById('export-areas').style.display = 'block';
+  document.getElementById('export-code-config').value = generateConfigCode();
+  document.getElementById('export-code-index').value = generateIndexHtml();
 });
 
-document.getElementById('btn-copy').addEventListener('click', () => {
-  const codeEl = document.getElementById('export-code');
+function handleCopy(textAreaId, btnId) {
+  const codeEl = document.getElementById(textAreaId);
   if (!codeEl.value) {
     alert("Please generate the code first!");
     return;
   }
-
   navigator.clipboard.writeText(codeEl.value).then(() => {
-    const btn = document.getElementById('btn-copy');
+    const btn = document.getElementById(btnId);
     const originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="material-symbols-outlined">check</span> Copied!`;
+    btn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 16px;">check</span> Copied!`;
     setTimeout(() => btn.innerHTML = originalText, 2000);
   }).catch(err => {
     alert("Failed to copy. Please select all and copy manually.");
   });
-});
+}
+
+function handleDownload(textAreaId, filename) {
+  const codeEl = document.getElementById(textAreaId);
+  if (!codeEl.value) {
+    alert("Please generate the code first!");
+    return;
+  }
+  const blob = new Blob([codeEl.value], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('btn-copy-config').addEventListener('click', () => handleCopy('export-code-config', 'btn-copy-config'));
+document.getElementById('btn-copy-index').addEventListener('click', () => handleCopy('export-code-index', 'btn-copy-index'));
+document.getElementById('btn-download-config').addEventListener('click', () => handleDownload('export-code-config', 'config.js'));
+document.getElementById('btn-download-index').addEventListener('click', () => handleDownload('export-code-index', 'index.html'));
 
 // --- GitHub Deployment ---
 const ghUsernameInput = document.getElementById('gh-username');
@@ -685,32 +943,28 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
   statusEl.textContent = 'Preparing configuration...';
   statusEl.style.color = 'var(--text-main)';
 
-  const code = generateConfigCode();
+  const codeConfig = generateConfigCode();
+  const codeIndexHtml = generateIndexHtml();
 
   try {
-    statusEl.textContent = 'Fetching current file status...';
-
-    // 1. Get the current file's SHA (required to update it)
-    const fileUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
-    const getRes = await fetch(fileUrl, {
-      headers: {
-        'Authorization': `token ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+    // ---- 1. Deploy config.js ----
+    statusEl.textContent = 'Fetching current config.js status...';
+    
+    const configUrl = `https://api.github.com/repos/${username}/${repo}/contents/config.js`;
+    let configRes = await fetch(configUrl, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
     });
-
-    let sha = null;
-    if (getRes.ok) {
-      const data = await getRes.json();
-      sha = data.sha;
-    } else if (getRes.status !== 404) {
-      throw new Error('Failed to fetch current file. Check your credentials and repo name.');
+    
+    let configSha = null;
+    if (configRes.ok) {
+      const data = await configRes.json();
+      configSha = data.sha;
+    } else if (configRes.status !== 404) {
+      throw new Error('Failed to fetch config.js. Check your credentials and repo name.');
     }
 
-    statusEl.textContent = 'Pushing update to GitHub...';
-
-    // 2. Update the file
-    const putRes = await fetch(fileUrl, {
+    statusEl.textContent = 'Pushing config.js to GitHub...';
+    let putConfigRes = await fetch(configUrl, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${token}`,
@@ -719,36 +973,73 @@ document.getElementById('btn-deploy').addEventListener('click', async () => {
       },
       body: JSON.stringify({
         message: 'Update config.js via Bio Link Editor',
-        content: btoa(unescape(encodeURIComponent(code))), // Base64 encode the content safely
-        sha: sha
+        content: btoa(unescape(encodeURIComponent(codeConfig))),
+        sha: configSha
       })
     });
 
-    if (putRes.ok) {
-      statusEl.textContent = 'Successfully deployed! Changes should be live in ~30 seconds.';
-      statusEl.style.color = '#388e3c'; // Green
+    if (!putConfigRes.ok) {
+      const errorData = await putConfigRes.json();
+      throw new Error(errorData.message || 'Failed to update config.js.');
+    }
 
-      // Clear draft after successful deploy
-      localStorage.removeItem(DRAFT_KEY);
-      lastSavedStr = JSON.stringify(currentConfig);
+    // ---- 2. Deploy index.html ----
+    statusEl.textContent = 'Fetching current index.html status...';
+    
+    const indexUrl = `https://api.github.com/repos/${username}/${repo}/contents/index.html`;
+    let indexRes = await fetch(indexUrl, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    
+    let indexSha = null;
+    if (indexRes.ok) {
+      const data = await indexRes.json();
+      indexSha = data.sha;
+    } else if (indexRes.status !== 404) {
+      throw new Error('Failed to fetch index.html.');
+    }
 
-      const discardBtn = document.getElementById('btn-discard-draft-top');
-      if (discardBtn) discardBtn.style.display = 'none';
+    statusEl.textContent = 'Pushing index.html to GitHub...';
+    let putIndexRes = await fetch(indexUrl, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update index.html (SEO) via Bio Link Editor',
+        content: btoa(unescape(encodeURIComponent(codeIndexHtml))),
+        sha: indexSha
+      })
+    });
 
-      const warningBanner = document.getElementById('draft-warning-banner');
-      if (warningBanner) warningBanner.style.display = 'none';
+    if (!putIndexRes.ok) {
+      const errorData = await putIndexRes.json();
+      throw new Error(errorData.message || 'Failed to update index.html.');
+    }
 
-      const statusIndicator = document.getElementById('draft-status-indicator');
-      if (statusIndicator) {
-        statusIndicator.className = 'draft-status-pill saved';
-        statusIndicator.innerHTML = `
-          <span class="material-symbols-outlined status-icon">check_circle</span>
-          <span class="status-text">Saved</span>
-        `;
-      }
-    } else {
-      const errorData = await putRes.json();
-      throw new Error(errorData.message || 'Failed to update file.');
+    // ---- Success ----
+    statusEl.textContent = 'Successfully deployed both files! Changes should be live in ~30 seconds.';
+    statusEl.style.color = '#388e3c'; // Green
+
+    // Clear draft after successful deploy
+    localStorage.removeItem(DRAFT_KEY);
+    lastSavedStr = JSON.stringify(currentConfig);
+
+    const discardBtn = document.getElementById('btn-discard-draft-top');
+    if (discardBtn) discardBtn.style.display = 'none';
+
+    const warningBanner = document.getElementById('draft-warning-banner');
+    if (warningBanner) warningBanner.style.display = 'none';
+
+    const statusIndicator = document.getElementById('draft-status-indicator');
+    if (statusIndicator) {
+      statusIndicator.className = 'draft-status-pill saved';
+      statusIndicator.innerHTML = `
+        <span class="material-symbols-outlined status-icon">check_circle</span>
+        <span class="status-text">Saved</span>
+      `;
     }
   } catch (error) {
     console.error(error);
