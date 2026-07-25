@@ -785,7 +785,7 @@ async function generateIndexHtml() {
 
   let jsonLd = doc.querySelector('script[type="application/ld+json"]');
   if (jsonLd) {
-    jsonLd.textContent = '\\n  ' + JSON.stringify(schemaData, null, 2) + '\\n  ';
+    jsonLd.textContent = '\n  ' + JSON.stringify(schemaData, null, 2) + '\n  ';
   }
 
   const noscript = doc.querySelector('noscript');
@@ -797,13 +797,13 @@ async function generateIndexHtml() {
       <p>${profileBio}</p>
       <hr style="max-width: 400px; margin: 2rem auto;">
       <ul style="list-style: none; padding: 0; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-        ${(config.socials || []).map(s => `<li><a href="${s.url}">${s.label}</a></li>`).join('\\n        ')}
+        ${(config.socials || []).map(s => `<li><a href="${s.url}">${s.label}</a></li>`).join('\n        ')}
       </ul>
     </div>
   `;
   }
 
-  return '<!DOCTYPE html>\\n' + doc.documentElement.outerHTML;
+  return '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
 }
 
 document.getElementById('btn-generate').addEventListener('click', async () => {
