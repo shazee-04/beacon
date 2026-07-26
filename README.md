@@ -25,7 +25,7 @@ For complete schema details, examples, and deployment guides, view the [Beacon D
 
 <p>
   
-  <img src="https://github.com/user-attachments/assets/c43d8be7-7387-46c1-ba95-c75d8452acab" alt="Beacon Link in Bio Preview" width="100%" />
+  <img src="https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/hompage-ui-beacon.gif" alt="Beacon Link in Bio Preview" width="100%" />
 
 </p>
 
@@ -49,7 +49,7 @@ For complete schema details, examples, and deployment guides, view the [Beacon D
 ## Visual Admin Dashboard (`edit.html`)
 
 <p align="center">
-  <img width="100%" alt="admin-ui-beacon" src="https://github.com/user-attachments/assets/a3d325d1-c72d-4a26-8a5c-640e7cf4396d" />
+  <img width="100%" alt="admin-ui-beacon" src="https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/admin-ui-beacon.png" />
 </p>
 
 Beacon includes a built-in, local **Visual Editor** that runs entirely in your browser without requiring a backend database. 
@@ -58,20 +58,26 @@ Beacon includes a built-in, local **Visual Editor** that runs entirely in your b
 > Just double-click or serve [edit.html](edit.html) to open the Admin UI and configure your site visually.
 
 ### Key Admin UI Features
+- **Organized Tab Navigation**: Clean sidebar workspace ordered by Profile, Skills, Socials, CTA, Featured, Links, Theme, SEO, Settings, and Save & Deploy.
+- **Advanced SEO Controls**: Customize Page Title, Meta Description, Language (`lang`), and Theme Color alongside Open Graph images and Twitter handle.
+- **Dynamic Template & Static HTML Generator**: Generates a fully static, SEO-rich `index.html` dynamically parsed via `DOMParser` alongside `config.js` and `sitemap.xml`.
+- **Atomic One-Click Deployments**:
+  - Securely authenticates using a GitHub Personal Access Token (stored only in browser local storage).
+  - Pushes `config.js`, `index.html`, and `sitemap.xml` as a single atomic git commit via GitHub Git Data API.
+  - Upload avatar and featured project images directly to your repo from the editor.
+- **Separate Export Options**: Offers distinct textareas with individual Copy and Download buttons for `config.js`, `index.html`, and `sitemap.xml`.
 - **Real-Time Device Simulator**: Features a split-pane phone simulator iframe that instantly renders configuration updates.
 - **Drag-and-Drop Reordering**: Rearrange links, skill badges, and highlights easily with drag-and-drop sorting powered by SortableJS.
-- **Theme Builder**: Switch between 8 theme presets or customize colors and CSS properties interactively.
-- **Automated Git Deployments**:
-  - Securely authenticate using a GitHub Personal Access Token (stored only in local storage).
-  - Directly commit and deploy updates to your `config.js` on GitHub with a single click.
-  - Upload avatar and featured project images directly to your repo from the editor.
-- **Local Draft Autosave**: Automatically persists your edits to local storage so you can close the tab and resume without losing changes.
+- **Theme Builder**: Switch between presets or customize colors and CSS properties interactively.
+- **Local Draft Autosave**: Automatically persists your edits to local storage so you can resume without losing changes.
 
 ---
 
 ## Key Features
 
-- **Configuration-Driven**: Manage all profile details, skill tags, social handles, CTAs, and links dynamically from a single file (`config.js`).
+- **Configuration & SEO Driven**: Manage all profile details, skill tags, social handles, CTAs, and links dynamically from `config.js` with static `index.html` pre-rendering for optimal search crawler indexing.
+- **AI & Answer Engine Optimized**: Built-in JSON-LD structured data featuring `ProfilePage`, `Person`, and `ItemList` schemas for AI agents (ChatGPT, Perplexity, Claude, Gemini).
+- **Automated Sitemap Generation**: Built-in `sitemap.xml` generator aligned with your canonical domain URL.
 - **Rich Interactive Components**:
   - Parallax animated gradient mesh background tracking cursor movement.
   - Collapsible sublinks with dual action buttons (e.g., View and Download).
@@ -93,12 +99,15 @@ Beacon includes a built-in, local **Visual Editor** that runs entirely in your b
 │   └── icons/           # App icons (contains Beacon.png logo)
 ├── profile-image/       # Profile avatar images
 ├── config.js            # Main configuration file (Modify this!)
-├── index.html           # Main template displaying links (Bootstrap 5)
-├── script.js            # Core page renderer & parallax animation logic
-├── edit.html            # Visual editor page for configuring links
-├── edit.js              # State management & GitHub integration logic
+├── index.html           # Main static template & pre-rendered SEO page
+├── script.js            # Core page renderer & dynamic SEO fallback logic
+├── edit.html            # Visual editor page for configuring links & SEO
+├── edit.js              # Editor logic, DOM template parser & atomic deployment
 ├── edit.css             # Editor dashboard styling
-└── style.css            # Styling rules, theme CSS variables
+├── style.css            # Styling rules & theme CSS variables
+├── manifest.json        # PWA Web App Manifest
+├── sitemap.xml          # XML Sitemap for search engine indexing
+└── llms.txt             # AI Answer Engine discovery file
 ```
 
 ---
@@ -120,12 +129,12 @@ npx serve
 You can configure your profile in two ways:
 
 #### Option A: Visual Admin UI (Recommended)
-1. Open [edit.html](edit.html) in your browser.
-2. Edit your profile, links, themes, and social details.
-3. Save, export the config, or configure the Git Integration in the Settings tab to deploy directly.
+1. Navigate to `http://localhost:8000/edit.html` (or your local server address) in your browser.
+2. Edit your profile, links, themes, and SEO settings.
+3. Open the **Save & Deploy** tab to automatically generate your static SEO markup, and use the Git Integration to deploy `config.js`, `index.html`, and `sitemap.xml` to GitHub in one click.
 
 #### Option B: Manual File Editing
-Open `config.js` in your text editor and modify the options.
+Open `config.js` in your text editor and modify the options manually. (Note: Using the Visual Editor is recommended to ensure your static `index.html` SEO tags and `sitemap.xml` are generated correctly).
 
 <details>
 <summary>View configuration Template</summary>
@@ -141,7 +150,19 @@ window.APP_CONFIG = {
     username: "your-username"
   },
 
-  // 2. Theme settings
+  // 2. SEO settings (Smart defaults are used if omitted)
+  seo: {
+    siteUrl: "https://yourdomain.com",
+    pageTitle: "Your Name • Professional Title",
+    metaDescription: "Find all links, socials, and projects in one place.",
+    keywords: "bio link, linktree alternative, open source link in bio",
+    ogImage: "assets/icons/Beacon.png",
+    twitterHandle: "@your_handle",
+    language: "en",
+    themeColor: "#222222"
+  },
+
+  // 3. Theme settings
   // Available presets: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'cyberpunk-neon', 'abyss-slate', 'forest-shadow', 'custom'
   theme: {
     preset: "deep-indigo",
@@ -158,14 +179,14 @@ window.APP_CONFIG = {
     }
   },
 
-  // 3. Skill tags
+  // 4. Skill tags
   skills: [
     { label: "Engineering", icon: "code" },
     { label: "Designing", icon: "palette" },
     { label: "Writing", icon: "edit" }
   ],
 
-  // 4. Social media quick action buttons
+  // 5. Social media quick action buttons
   socials: [
     {
       id: "social-github",
@@ -196,7 +217,7 @@ window.APP_CONFIG = {
     }
   ],
 
-  // 5. Prominent Call-To-Action buttons
+  // 6. Prominent Call-To-Action buttons
   ctas: [
     {
       label: "View Portfolio",
@@ -212,7 +233,7 @@ window.APP_CONFIG = {
     }
   ],
 
-  // 6. Featured highlights section
+  // 7. Featured highlights section
   featuredTitle: "Featured Works",
   featured: [
     {
@@ -235,7 +256,7 @@ window.APP_CONFIG = {
     }
   ],
 
-  // 7. Main vertical links list
+  // 8. Main vertical links list
   links: [
     // Standard link tile
     {
@@ -327,7 +348,7 @@ window.APP_CONFIG = {
     }
   ],
 
-  // 8. Footer settings
+  // 9. Footer settings
   footer: {
     year: 2026,
     text: "Created with"

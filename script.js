@@ -140,10 +140,12 @@
     const profileName = config.profile.name || 'Beacon';
     const profileTitle = config.profile.title || 'Link-in-Bio';
     const profileBio = config.profile.bio || '';
-    const seoTitle = `${profileName} — ${profileTitle} | Links & Profile`;
+    const isBeaconBrand = profileName.toLowerCase().includes('beacon');
+    const seoTitle = isBeaconBrand ? `${profileName} • ${profileTitle}` : `${profileName} • ${profileTitle} | Beacon`;
     
     // Update Document Title
-    document.title = seoTitle;
+    const isCustomTitle = config.seo && config.seo.pageTitle && config.seo.pageTitle.length > 0;
+    document.title = isCustomTitle ? config.seo.pageTitle : seoTitle;
 
     // Helper to add or update meta tags
     const setMetaTag = (attr, attrValue, content) => {
@@ -157,15 +159,21 @@
       tag.setAttribute('content', content);
     };
 
-    // Description
-    const metaDesc = `${profileName} — ${profileTitle}. ${profileBio.substring(0, 100)}... Find all links, socials, and projects in one place.`;
+    // Description & Robots
+    const metaDesc = profileBio ? `${profileName} - ${profileTitle}. ${profileBio} - Find all links, socials, and projects in one place.` : `${profileName} - ${profileTitle}. Find all links, socials, and projects in one place.`;
     setMetaTag('name', 'description', metaDesc);
+    setMetaTag('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
 
     // Get SEO config with smart fallbacks
     const seo = config.seo || {};
     const siteUrl = seo.siteUrl || window.location.origin;
-    const ogImage = seo.ogImage || (config.profile.avatar.length > 1 ? config.profile.avatar : '');
+    const ogImage = seo.ogImage || (config.profile.avatar && config.profile.avatar.length > 1 ? config.profile.avatar : '');
     
+    // Meta Keywords
+    if (seo.keywords) {
+      setMetaTag('name', 'keywords', seo.keywords);
+    }
+
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]');
     if (!canonical) {
@@ -180,6 +188,7 @@
     setMetaTag('property', 'og:title', seoTitle);
     setMetaTag('property', 'og:description', metaDesc);
     setMetaTag('property', 'og:url', siteUrl);
+    setMetaTag('property', 'og:site_name', profileName);
     if (ogImage) setMetaTag('property', 'og:image', ogImage);
     if (config.profile.name) {
       const parts = config.profile.name.split(' ');

@@ -1,0 +1,17 @@
+{
+  "name": "Shazee Sandaruwan — Link in Bio",
+  "short_name": "shazee",
+  "description": "Fullstack developer building aesthetic and performance-driven web experiences.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFFBFF",
+  "theme_color": "#222222",
+  "icons": [
+    {
+      "src": "profile-image/profile.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

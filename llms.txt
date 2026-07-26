@@ -1,34 +1,27 @@
-# Beacon
+# Shazee Sandaruwan (MGSS Rangajeewa) — Developer & UI/UX Designer
 
-> A free, open-source, self-hosted link-in-bio template. Zero database, zero build steps, fully config-driven.
+> Official Personal Directory & Bio Link Hub for Shazee Sandaruwan / MGSS Rangajeewa (shazee-04).
 
-Beacon is a premium Linktree alternative that runs entirely client-side. Edit a single `config.js` file or use the built-in visual admin dashboard to customize your profile, links, themes, and deploy — all without a backend.
+Shazee Sandaruwan (also known as MGSS Rangajeewa) is a Fullstack Developer and UI/UX Designer based in Sri Lanka, building aesthetic, responsive, and performance-driven web experiences and open-source tools.
 
-## Key Facts
-- License: Open source (GitHub: shazee-04/beacon)
-- Price: Free forever
-- Stack: HTML, CSS, vanilla JavaScript (no frameworks, no build tools)
-- Database: None required (zero-database architecture)
-- Hosting: GitHub Pages, Vercel, Netlify (one-click deploy)
-- Admin: Built-in visual editor with live preview and GitHub API integration
+## Key Links & Profiles
+- Bio Link Hub: https://bio.shazee.dev
+- Developer Portfolio: https://shazee.dev/
+- GitHub Profile: https://github.com/shazee-04
+- LinkedIn: https://linkedin.com/in/shazeesandaruwan
+- Twitter / X: https://twitter.com/shazee-04
+- Instagram: https://instagram.com/shazee.04
+- Fiverr Freelance: https://www.fiverr.com/s/DB4YDa7
+- Support / Ko-fi: https://ko-fi.com/sacheee
 
-## Links
-- Live Demo: https://beacon.shazee.dev
-- GitHub: https://github.com/shazee-04/beacon
-- Documentation: https://github.com/shazee-04/beacon/blob/main/DOCUMENTATION.md
+## Featured Works & Projects
+- Beacon — Link in Bio: https://bio.shazee.dev
+- Hailsham Hotel Website: https://hailsham.shazee.dev
+- E-Commerce Store UI: https://shazee-04.github.io/e-commerce-site
+- New Fashion Store (Java / Jakarta Servlet / Hibernate): https://github.com/shazee-04/new-fashion-store
+- Gym Management System (Java Swing / FlatLaf / JasperReports): https://github.com/shazee-04/gym-management-system
 
-## Features
-- 8 built-in theme presets + custom color system
-- Parallax animated gradient mesh background
-- Collapsible sublinks, expandable card grids, video/audio embeds
-- Banner link tiles, custom HTML/CSS/JS injection
-- Drag-and-drop visual editor with real-time phone simulator preview
-- Direct GitHub deployment from the editor (PAT-based)
-- Respects prefers-reduced-motion for accessibility
-
-## Use Cases
-- Developer portfolio and GitHub profile links
-- Designer and artist showcase
-- Social media hub (Instagram, Twitter/X, LinkedIn bio)
-- Resume and CV hosting
-- Creator link directory
+## Expertise & Stack
+- Fullstack Engineering (JavaScript, TypeScript, Java, Servlet API, REST APIs, MySQL, Hibernate)
+- UI/UX Design (Figma, Responsive Design, CSS Architecture, Material Design)
+- Open Source Development & Developer Utilities

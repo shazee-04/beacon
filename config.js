@@ -7,19 +7,22 @@
 window.APP_CONFIG = {
   // Profile settings
   profile: {
-    name: "MGSS RANGAJEEWA",
-    title: "Software Engineer | Designer",
-    bio: "Building aesthetic, responsive, and performance-driven web experiences. Passionate about open-source and UI/UX.",
-    avatar: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/me.jpg",
-    username: "shazee.04"
+    name: "Shazee Sandaruwan",
+    title: "Developer • Designer",
+    bio: "Fullstack developer building aesthetic and performance-driven web experiences. Passionate about open-source and UI/UX. Based in Sri Lanka.",
+    avatar: "profile-image/profile.jpg",
+    username: "shazee"
   },
-
   // SEO settings
   seo: {
-    siteUrl: "https://bio.shazee.dev",             // Your personal canonical URL
-    ogImage: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/images/me.jpg", // Using your avatar for OG
-    twitterHandle: "@shazee_04",                   // Twitter/X handle
-    keywords: "bio link, portfolio, software engineer, designer"
+    siteUrl: "https://bio.shazee.dev",          // Your canonical URL (important for SEO)
+    ogImage: "https://bio.shazee.dev/profile-image/profile.jpg", // Open Graph share image
+    twitterHandle: "@shazee_04",                 // Twitter/X handle
+    keywords: "Shazee Sandaruwan, MGSS Rangajeewa, shazee, shazee.04, bio link, developer, designer, software engineering student, portfolio, static bio link, developer portfolio",
+    pageTitle: "Shazee (Mgss Rangajeewa) • Developer • UI/UX Designer • AI Enthusiast",        // Custom <title> override
+    metaDescription: "",  // Custom meta description override
+    language: "en",       // HTML lang attribute
+    themeColor: ""        // <meta name="theme-color"> value
   },
 
   // Theme settings (preset: 'deep-indigo', 'sunset-peach', 'emerald-sage', 'midnight-tech', 'monochrome-ink', 'cyberpunk-neon', 'abyss-slate', 'forest-shadow', 'custom')
@@ -150,8 +153,8 @@ window.APP_CONFIG = {
       subtitle: "Explore my coding projects, web apps, and technical skills",
       url: "https://shazee.dev/",
       icon: {
-        type: "material",
-        name: "terminal"
+        type: "image",
+        url: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/icons/shazee-dev-favicon.svg"
       }
     },
     {
@@ -160,7 +163,7 @@ window.APP_CONFIG = {
       subtitle: "Read about my latest design workflow and process",
       icon: {
         type: "material",
-        name: "article"
+        name: "folder_copy"
       },
       isExpandableCard: true,
       expandedByDefault: false,
