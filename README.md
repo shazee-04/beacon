@@ -20,6 +20,8 @@ For complete schema details, examples, and deployment guides, view the [Beacon D
   [![Live Demo](https://img.shields.io/badge/Live%20Demo-07e354?style=for-the-badge&logo=google-chrome&logoColor=white)](https://bio.shazee.dev)
   [![Documentation](https://img.shields.io/badge/Documentation-5D5C72?style=for-the-badge&logo=gitbook&logoColor=white)](DOCUMENTATION.md)
   [![Fork Repository](https://img.shields.io/badge/Fork%20Repository-6803ff?style=for-the-badge&logo=github&logoColor=white)](https://github.com/shazee-04/beacon/fork)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge)](CONTRIBUTING.md)
 
 </div>
 
@@ -33,7 +35,7 @@ For complete schema details, examples, and deployment guides, view the [Beacon D
   
   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=github.com/shazee-04/beacon)
   [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=github.com/shazee-04/beacon)  
-  [Report Bug](https://github.com/shazee-04/beacon/issues) · [Request Feature](https://github.com/shazee-04/beacon/issues)
+  [Report Bug](https://github.com/shazee-04/beacon/issues) · [Request Feature](https://github.com/shazee-04/beacon/issues) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -405,3 +407,21 @@ Theme options are driven by preset templates but can be fully customized in your
 
 > [!NOTE]
 > All icons (unless custom SVGs are supplied) utilize Google's **Material Symbols Outlined** font library. You can browse and substitute any icon name from [Google Fonts Icons](https://fonts.google.com/icons).
+
+---
+
+## 🤝 Contributing & Community
+
+Contributions are what make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**!
+
+- 📖 Read our [Contributing Guide](CONTRIBUTING.md) to learn how to submit bug fixes, feature ideas, and pull requests.
+- 📜 Check our [Code of Conduct](CODE_OF_CONDUCT.md) for community standards.
+- 🛡️ Report security concerns responsibly by following our [Security Policy](SECURITY.md).
+- 🏷️ Looking for good first issues? Browse open issues tagged [`good first issue`](https://github.com/shazee-04/beacon/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22).
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+
