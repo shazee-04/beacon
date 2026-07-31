@@ -1,0 +1,44 @@
+name: Code Quality & Syntax Validation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Validate Code & Syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JavaScript Syntax
+        run: |
+          echo "Checking JavaScript syntax..."
+          node --check script.js
+          node --check config.js
+          node --check edit.js
+
+      - name: Validate JSON Schema Files
+        run: |
+          echo "Validating manifest.json..."
+          node -e "JSON.parse(require('fs').readFileSync('manifest.json', 'utf8'))"
+          if [ -f "skills-lock.json" ]; then
+            echo "Validating skills-lock.json..."
+            node -e "JSON.parse(require('fs').readFileSync('skills-lock.json', 'utf8'))"
+          fi
+
+      - name: Check HTML File Structure
+        run: |
+          echo "Checking HTML files exist and are readable..."
+          test -f index.html || (echo "index.html missing!" && exit 1)
+          test -f edit.html || (echo "edit.html missing!" && exit 1)
+          echo "All HTML files present."
