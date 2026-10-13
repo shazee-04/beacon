@@ -110,7 +110,7 @@ window.APP_CONFIG = {
   ctas: [
     {
       label: "My Website",
-      url: "https://shazee.dev",
+      url: "https://www.shazee.dev",
       icon: "open_in_new",
       style: "primary"
     },
@@ -126,12 +126,12 @@ window.APP_CONFIG = {
   featuredTitle: "",
   featured: [
     {
-      title: "Beacon — Link in Bio",
+      title: "Beacon - Link in Bio",
       subtitle: "Open Source",
       badge: "Latest",
       description: "A premium, zero-database Linktree alternative. Configuration-driven, animated mesh background, and fully responsive.",
       image: "https://github.com/user-attachments/assets/c43d8be7-7387-46c1-ba95-c75d8452acab",
-      url: "https://bio.shazee.dev",
+      url: "https://beacon.shazee.dev",
       actionLabel: "View Live"
     },
     {
@@ -151,7 +151,7 @@ window.APP_CONFIG = {
       id: "link-dev-portfolio",
       label: "Developer Portfolio",
       subtitle: "Explore my coding projects, web apps, and technical skills",
-      url: "https://shazee.dev/",
+      url: "https://www.shazee.dev/",
       icon: {
         type: "image",
         url: "https://rmwghaysdfgtyuvsfrfl.supabase.co/storage/v1/object/public/beacon-assets/icons/shazee-dev-favicon.svg"
