@@ -205,28 +205,76 @@
 
     // JSON-LD ProfilePage & Person Schema
     const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
-    const schemaData = {
-      "@context": "https://schema.org",
-      "@type": "ProfilePage",
-      "dateModified": new Date().toISOString().split('T')[0],
-      "mainEntity": {
-        "@type": "Person",
-        "name": profileName,
-        "jobTitle": profileTitle,
-        "description": profileBio,
-        "url": siteUrl,
-        "sameAs": sameAsLinks
-      }
-    };
-    if (ogImage) schemaData.mainEntity.image = ogImage;
-    
+    const nowIso = new Date().toISOString();
     let schemaScript = document.querySelector('script[type="application/ld+json"]');
-    if (!schemaScript) {
-      schemaScript = document.createElement('script');
-      schemaScript.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(schemaScript);
+
+    if (schemaScript && schemaScript.textContent.trim()) {
+      try {
+        const existing = JSON.parse(schemaScript.textContent);
+        let profileObj = null;
+        if (existing['@graph'] && Array.isArray(existing['@graph'])) {
+          profileObj = existing['@graph'].find(item => item && item['@type'] === 'ProfilePage');
+        } else if (existing && existing['@type'] === 'ProfilePage') {
+          profileObj = existing;
+        }
+
+        if (profileObj) {
+          profileObj.dateModified = nowIso;
+          if (!profileObj.dateCreated) {
+            profileObj.dateCreated = "2026-07-26T00:00:00+05:30";
+          }
+          if (profileObj.mainEntity) {
+            profileObj.mainEntity.name = profileName;
+            profileObj.mainEntity.jobTitle = profileTitle;
+            profileObj.mainEntity.description = profileBio;
+            profileObj.mainEntity.url = siteUrl;
+            profileObj.mainEntity.sameAs = sameAsLinks;
+            if (ogImage) profileObj.mainEntity.image = ogImage;
+          }
+          schemaScript.textContent = '\n' + JSON.stringify(existing, null, 2) + '\n';
+        }
+      } catch (e) {
+        console.warn("Error updating existing JSON-LD schema:", e);
+      }
+    } else {
+      const itemElements = (config.links || []).map((link, idx) => ({
+        "@type": "SiteNavigationElement",
+        "position": idx + 1,
+        "name": link.label,
+        "url": link.url || siteUrl
+      }));
+      const schemaData = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "ProfilePage",
+            "dateCreated": "2026-07-26T00:00:00+05:30",
+            "dateModified": nowIso,
+            "mainEntity": {
+              "@type": "Person",
+              "name": profileName,
+              "jobTitle": profileTitle,
+              "description": profileBio,
+              "url": siteUrl,
+              "sameAs": sameAsLinks
+            }
+          },
+          {
+            "@type": "ItemList",
+            "name": `${profileName} Links`,
+            "itemListElement": itemElements
+          }
+        ]
+      };
+      if (ogImage) schemaData["@graph"][0].mainEntity.image = ogImage;
+
+      if (!schemaScript) {
+        schemaScript = document.createElement('script');
+        schemaScript.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(schemaScript);
+      }
+      schemaScript.textContent = '\n' + JSON.stringify(schemaData, null, 2) + '\n';
     }
-    schemaScript.textContent = JSON.stringify(schemaData);
   }
 
   // Render Avatar and Favicon

@@ -707,6 +707,10 @@ async function generateIndexHtml() {
       themeColor = config.theme.customColors.primary;
   }
 
+  const baseHtml = await fetchBaseIndexHtml();
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(baseHtml, 'text/html');
+
   // Schema Generation
   const sameAsLinks = (config.socials || []).map(s => s.url).filter(Boolean);
   
@@ -717,15 +721,35 @@ async function generateIndexHtml() {
     "url": link.url || siteUrl
   }));
 
+  let existingProfile = null;
+  const existingJsonLd = doc.querySelector('script[type="application/ld+json"]');
+  if (existingJsonLd && existingJsonLd.textContent.trim()) {
+    try {
+      const parsed = JSON.parse(existingJsonLd.textContent);
+      if (parsed['@graph'] && Array.isArray(parsed['@graph'])) {
+        existingProfile = parsed['@graph'].find(item => item && item['@type'] === 'ProfilePage');
+      } else if (parsed && parsed['@type'] === 'ProfilePage') {
+        existingProfile = parsed;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  const dateCreated = existingProfile?.dateCreated || "2026-07-26T00:00:00+05:30";
+  const alternateName = existingProfile?.mainEntity?.alternateName || (profileName.toLowerCase().includes('shazee') ? ["MGSS Rangajeewa", "MGSS RANGAJEEWA", "Mgss Rangajeewa", "shazee-04", "Shazee"] : undefined);
+
   const schemaData = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "ProfilePage",
-        "dateModified": new Date().toISOString().split('T')[0],
+        "dateCreated": dateCreated,
+        "dateModified": new Date().toISOString(),
         "mainEntity": {
           "@type": "Person",
           "name": profileName,
+          ...(alternateName ? { alternateName } : {}),
           "jobTitle": profileTitle,
           "description": profileBio,
           "url": siteUrl,
@@ -740,10 +764,6 @@ async function generateIndexHtml() {
     ]
   };
   if (ogImage) schemaData["@graph"][0].mainEntity.image = ogImage;
-
-  const baseHtml = await fetchBaseIndexHtml();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(baseHtml, 'text/html');
 
   doc.documentElement.lang = language;
   
